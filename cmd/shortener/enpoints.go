@@ -30,6 +30,12 @@ func listen(addr string, handler http.Handler) {
 }
 
 func saveUrl(res http.ResponseWriter, req *http.Request) {
+	if req.Method != http.MethodPost {
+		http.Error(res, "Only POST requests allowed!", http.StatusMethodNotAllowed)
+
+		return
+	}
+
 	err := req.ParseForm()
 	if err != nil {
 		res.Write([]byte(err.Error()))
@@ -47,10 +53,16 @@ func saveUrl(res http.ResponseWriter, req *http.Request) {
 	res.WriteHeader(http.StatusCreated)
 	res.Header().Set("content-type", "text/plain")
 
-	res.Write([]byte(fmt.Sprintf("localhost:8080/%s", id)))
+	res.Write(fmt.Appendf(nil, "http://localhost:8080/%s", id))
  }
 
-func getUrl(res http.ResponseWriter, req *http.Request) {    
+func getUrl(res http.ResponseWriter, req *http.Request) {
+	if req.Method != http.MethodGet {
+		http.Error(res, "Only GET requests allowed!", http.StatusMethodNotAllowed)
+
+		return
+	}
+
 	vars := mux.Vars(req)
     id := vars["id"]
 
