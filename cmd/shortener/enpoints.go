@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"math/rand"
 	"net/http"
 	"strings"
@@ -37,12 +38,16 @@ func saveUrl(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	id := ""
 	for _, v := range req.Form {
-		data[generateId()] = v[0]
+		id = generateId()
+		data[id] = v[0]
 	}
 
 	res.WriteHeader(http.StatusCreated)
 	res.Header().Set("content-type", "text/plain")
+
+	res.Write([]byte(fmt.Sprintf("localhost:8080/%s", id)))
  }
 
 func getUrl(res http.ResponseWriter, req *http.Request) {    
@@ -52,6 +57,8 @@ func getUrl(res http.ResponseWriter, req *http.Request) {
 	res.WriteHeader(http.StatusTemporaryRedirect)
 	res.Header().Set("content-type", "text/plain")
 	res.Header().Set("location", data[id])
+
+	res.Write([]byte(""))
 }
 
 func generateId() (string) {
