@@ -34,8 +34,8 @@ var storage = NewStorage()
 func getEndpoints() {
 	mux := mux.NewRouter()
 
-	mux.HandleFunc(`/`, saveUrl)
 	mux.HandleFunc(`/{id}`, getUrl)
+	mux.HandleFunc(`/`, saveUrl)
 
 	listen(`:8080`, mux)
 }
@@ -48,11 +48,11 @@ func listen(addr string, handler http.Handler) {
 }
 
 func saveUrl(res http.ResponseWriter, req *http.Request) {
-	if req.Method != http.MethodPost {
-		http.Error(res, "Only POST requests allowed!", http.StatusMethodNotAllowed)
+	// if req.Method != http.MethodPost {
+	// 	http.Error(res, "Only POST requests allowed!", http.StatusMethodNotAllowed)
 
-		return
-	}
+	// 	return
+	// }
 
 	err := req.ParseForm()
 	if err != nil {
