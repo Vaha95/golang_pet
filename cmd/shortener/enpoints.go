@@ -34,7 +34,7 @@ var storage = NewStorage()
 func getEndpoints() {
 	mux := mux.NewRouter()
 
-	mux.HandleFunc(`/{id}`, baseUrlMethods)
+	mux.HandleFunc(`/`, baseUrlMethods)
 
 	listen(`:8080`, mux)
 }
