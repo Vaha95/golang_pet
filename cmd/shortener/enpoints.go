@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"math/rand"
 	"net/http"
 	"strings"
@@ -12,7 +13,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var data map[string]string
 type Storage struct {
 	data sync.Map
 }
@@ -31,12 +31,13 @@ func NewStorage () *Storage {
 
 var storage = NewStorage()
 
-func getEndpoints() {
+func main() {
 	mux := mux.NewRouter()
 
-	mux.HandleFunc(`/`, baseUrlMethods)
+	mux.HandleFunc(`/{id}`, getUrl).Methods(http.MethodGet)
+	mux.HandleFunc(`/`, saveUrl).Methods(http.MethodPost)
 
-	listen(`:8080`, mux)
+	listen(`localhost:8080`, mux)
 }
 
 func listen(addr string, handler http.Handler) {
@@ -46,44 +47,54 @@ func listen(addr string, handler http.Handler) {
 	}
 }
 
-func baseUrlMethods(res http.ResponseWriter, req *http.Request) {
+func saveUrl(res http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodPost {
-		err := req.ParseForm()
-		if err != nil {
-			res.Write([]byte(err.Error()))
-			res.WriteHeader(http.StatusBadRequest)
+		http.Error(res, "Only POST requests allowed!", http.StatusMethodNotAllowed)
 
-			return
-		}
+		return
+	}
 
-		id := ""
-		for _, v := range req.Form {
-			id = generateId()
-			storage.Set(id, v[0])
-		}
+	defer req.Body.Close()
+	
+	reqBody, err := io.ReadAll(req.Body)
 
-		res.WriteHeader(http.StatusCreated)
-		res.Header().Set("content-type", "text/plain")
+	if err != nil {
+		http.Error(res, err.Error(), http.StatusBadRequest)
 
-		res.Write(fmt.Appendf(nil, "http://localhost:8080/%s", id))
-	} else {
-		vars := mux.Vars(req)
-		id := vars["id"]
+		return				
+	}
 
-		val, ok := storage.Get(id)
-		if !ok {		
-			res.WriteHeader(http.StatusNotFound)
-			res.Write([]byte(""))
-		}
+	id := generateId()
+	storage.Set(id, reqBody)
 
-		res.WriteHeader(http.StatusTemporaryRedirect)
-		res.Header().Set("content-type", "text/plain")
-		res.Header().Set("location", val.(string))
+	res.WriteHeader(http.StatusCreated)
+	res.Header().Set("Content-type", "text/plain")
 
+	res.Write(fmt.Appendf(nil, "http://localhost:8080/%s", id))
+ }
+
+func getUrl(res http.ResponseWriter, req *http.Request) {
+	// if req.Method != http.MethodGet {
+	// 	http.Error(res, "Only GET requests allowed!", http.StatusMethodNotAllowed)
+
+	// 	return
+	// }
+
+	vars := mux.Vars(req)
+    id := vars["id"]
+
+	val, ok := storage.Get(id)
+	if !ok {		
+		res.WriteHeader(http.StatusNotFound)
 		res.Write([]byte(""))
 	}
 
- }
+	res.WriteHeader(http.StatusTemporaryRedirect)
+	res.Header().Set("content-type", "text/plain")
+	res.Header().Set("location", val.(string))
+
+	res.Write([]byte(""))
+}
 
 func generateId() (string) {
 	rand.New((rand.NewSource(time.Now().UnixNano())))
