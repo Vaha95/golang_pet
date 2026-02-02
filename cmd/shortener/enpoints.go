@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 
 	// "github.com/Vaha95/golang_pet/internal/handler"
@@ -12,6 +13,23 @@ import (
 )
 
 var data map[string]string
+type Storage struct {
+	data sync.Map
+}
+
+func (s *Storage) Set(k string, v interface{}) {
+	s.data.Store(k, v)
+}
+
+func (s *Storage) Get(k string) (interface{}, bool) {
+	return s.data.Load(k)
+}
+
+func NewStorage () *Storage {
+	return &Storage{}
+}
+
+var storage = NewStorage()
 
 func getEndpoints() {
 	mux := mux.NewRouter()
@@ -47,7 +65,7 @@ func saveUrl(res http.ResponseWriter, req *http.Request) {
 	id := ""
 	for _, v := range req.Form {
 		id = generateId()
-		data[id] = v[0]
+		storage.Set(id, v[0])
 	}
 
 	res.WriteHeader(http.StatusCreated)
@@ -66,9 +84,15 @@ func getUrl(res http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
     id := vars["id"]
 
+	val, ok := storage.Get(id)
+	if !ok {		
+		res.WriteHeader(http.StatusNotFound)
+		res.Write([]byte(""))
+	}
+
 	res.WriteHeader(http.StatusTemporaryRedirect)
 	res.Header().Set("content-type", "text/plain")
-	res.Header().Set("location", data[id])
+	res.Header().Set("location", val.(string))
 
 	res.Write([]byte(""))
 }
