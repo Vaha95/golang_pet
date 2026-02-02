@@ -75,11 +75,11 @@ func saveUrl(res http.ResponseWriter, req *http.Request) {
  }
 
 func getUrl(res http.ResponseWriter, req *http.Request) {
-	if req.Method != http.MethodGet {
-		http.Error(res, "Only GET requests allowed!", http.StatusMethodNotAllowed)
+	// if req.Method != http.MethodGet {
+	// 	http.Error(res, "Only GET requests allowed!", http.StatusMethodNotAllowed)
 
-		return
-	}
+	// 	return
+	// }
 
 	vars := mux.Vars(req)
     id := vars["id"]
