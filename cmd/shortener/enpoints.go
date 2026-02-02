@@ -34,8 +34,7 @@ var storage = NewStorage()
 func getEndpoints() {
 	mux := mux.NewRouter()
 
-	mux.HandleFunc(`/{id}`, getUrl)
-	mux.HandleFunc(`/`, saveUrl)
+	mux.HandleFunc(`/{id}`, baseUrlMethods)
 
 	listen(`:8080`, mux)
 }
@@ -47,55 +46,44 @@ func listen(addr string, handler http.Handler) {
 	}
 }
 
-func saveUrl(res http.ResponseWriter, req *http.Request) {
-	// if req.Method != http.MethodPost {
-	// 	http.Error(res, "Only POST requests allowed!", http.StatusMethodNotAllowed)
+func baseUrlMethods(res http.ResponseWriter, req *http.Request) {
+	if req.Method != http.MethodPost {
+		err := req.ParseForm()
+		if err != nil {
+			res.Write([]byte(err.Error()))
+			res.WriteHeader(http.StatusBadRequest)
 
-	// 	return
-	// }
+			return
+		}
 
-	err := req.ParseForm()
-	if err != nil {
-		res.Write([]byte(err.Error()))
-		res.WriteHeader(http.StatusBadRequest)
+		id := ""
+		for _, v := range req.Form {
+			id = generateId()
+			storage.Set(id, v[0])
+		}
 
-		return
-	}
+		res.WriteHeader(http.StatusCreated)
+		res.Header().Set("content-type", "text/plain")
 
-	id := ""
-	for _, v := range req.Form {
-		id = generateId()
-		storage.Set(id, v[0])
-	}
+		res.Write(fmt.Appendf(nil, "http://localhost:8080/%s", id))
+	} else {
+		vars := mux.Vars(req)
+		id := vars["id"]
 
-	res.WriteHeader(http.StatusCreated)
-	res.Header().Set("content-type", "text/plain")
+		val, ok := storage.Get(id)
+		if !ok {		
+			res.WriteHeader(http.StatusNotFound)
+			res.Write([]byte(""))
+		}
 
-	res.Write(fmt.Appendf(nil, "http://localhost:8080/%s", id))
- }
+		res.WriteHeader(http.StatusTemporaryRedirect)
+		res.Header().Set("content-type", "text/plain")
+		res.Header().Set("location", val.(string))
 
-func getUrl(res http.ResponseWriter, req *http.Request) {
-	// if req.Method != http.MethodGet {
-	// 	http.Error(res, "Only GET requests allowed!", http.StatusMethodNotAllowed)
-
-	// 	return
-	// }
-
-	vars := mux.Vars(req)
-    id := vars["id"]
-
-	val, ok := storage.Get(id)
-	if !ok {		
-		res.WriteHeader(http.StatusNotFound)
 		res.Write([]byte(""))
 	}
 
-	res.WriteHeader(http.StatusTemporaryRedirect)
-	res.Header().Set("content-type", "text/plain")
-	res.Header().Set("location", val.(string))
-
-	res.Write([]byte(""))
-}
+ }
 
 func generateId() (string) {
 	rand.New((rand.NewSource(time.Now().UnixNano())))
