@@ -22,8 +22,8 @@ func init() {
 func main() {
 	mux := mux.NewRouter()
 
-	mux.HandleFunc(`/{id}`, getUrl).Methods(http.MethodGet)
-	mux.HandleFunc(`/`, saveUrl).Methods(http.MethodPost)
+	mux.HandleFunc(`/{id}`, getURL).Methods(http.MethodGet)
+	mux.HandleFunc(`/`, saveURL).Methods(http.MethodPost)
 
 	listen(`localhost:8080`, mux)
 }
@@ -35,7 +35,7 @@ func listen(addr string, handler http.Handler) {
 	}
 }
 
-func saveUrl(res http.ResponseWriter, req *http.Request) {
+func saveURL(res http.ResponseWriter, req *http.Request) {
 	if req.Method != http.MethodPost {
 		http.Error(res, "Only POST requests allowed!", http.StatusMethodNotAllowed)
 
@@ -52,15 +52,15 @@ func saveUrl(res http.ResponseWriter, req *http.Request) {
 		return				
 	}
 
-	inputUrl := string(reqBody)
-	u, err := url.ParseRequestURI(inputUrl)
+	inputURL := string(reqBody)
+	u, err := url.ParseRequestURI(inputURL)
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 
 		return
 	}
 
-	id := generateId()
+	id := generateID()
 	urls[id] = u.String()
 
 	res.WriteHeader(http.StatusCreated)
@@ -69,7 +69,7 @@ func saveUrl(res http.ResponseWriter, req *http.Request) {
 	res.Write(fmt.Appendf(nil, "http://localhost:8080/%s", id))
  }
 
-func getUrl(res http.ResponseWriter, req *http.Request) {
+func getURL(res http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
     id := vars["id"]
 
@@ -85,7 +85,7 @@ func getUrl(res http.ResponseWriter, req *http.Request) {
 	http.Redirect(res, req, val, http.StatusTemporaryRedirect)
 }
 
-func generateId() (string) {
+func generateID() (string) {
 	rand.New((rand.NewSource(time.Now().UnixNano())))
 	chars := []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
 		"abcdefghijklmnopqrstuvwxyz" +
