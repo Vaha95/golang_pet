@@ -23,7 +23,7 @@ func TestSaveUrl(t *testing.T) {
 	request.Header.Add("Content-type", "text/plain")
 
 	w := httptest.NewRecorder()
-	saveUrl(w, request)
+	saveURL(w, request)
 
 	res := w.Result()
 	assert.Equal(t, 201, res.StatusCode)
