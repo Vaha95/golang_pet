@@ -6,30 +6,12 @@ import (
 	"io"
 	"math/rand"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
-	// "github.com/Vaha95/golang_pet/internal/handler"
 	"github.com/gorilla/mux"
 )
-
-// type Storage struct {
-// 	data sync.Map
-// }
-
-// func (s *Storage) Set(k string, v interface{}) {
-// 	s.data.Store(k, v)
-// }
-
-// func (s *Storage) Get(k string) (interface{}, bool) {
-// 	return s.data.Load(k)
-// }
-
-// func NewStorage () *Storage {
-// 	return &Storage{}
-// }
-
-// var storage = NewStorage()
 
 var urls map[string]string
 
@@ -70,8 +52,16 @@ func saveUrl(res http.ResponseWriter, req *http.Request) {
 		return				
 	}
 
+	inputUrl := string(reqBody)
+	u, err := url.ParseRequestURI(inputUrl)
+	if err != nil {
+		http.Error(res, err.Error(), http.StatusBadRequest)
+
+		return
+	}
+
 	id := generateId()
-	urls[id] = string(reqBody)
+	urls[id] = u.String()
 
 	res.WriteHeader(http.StatusCreated)
 	res.Header().Set("Content-type", "text/plain")
@@ -80,7 +70,6 @@ func saveUrl(res http.ResponseWriter, req *http.Request) {
  }
 
 func getUrl(res http.ResponseWriter, req *http.Request) {
-
 	vars := mux.Vars(req)
     id := vars["id"]
 
@@ -93,15 +82,7 @@ func getUrl(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// res.Write([]byte(reflect.TypeOf(val).String()))
-
-	http.Redirect(res, req, fmt.Sprintf("http://%s", val), http.StatusTemporaryRedirect)
-	return
-
-	res.WriteHeader(http.StatusTemporaryRedirect)
-	res.Header().Add("Location", fmt.Sprintf("http://%s", val))
-
-	res.Write([]byte(""))
+	http.Redirect(res, req, val, http.StatusTemporaryRedirect)
 }
 
 func generateId() (string) {
