@@ -1,4 +1,4 @@
-package main
+package handler
 
 import (
 	"bytes"
@@ -16,8 +16,12 @@ func TestSaveUrl(t *testing.T) {
 	request := httptest.NewRequest(http.MethodPost, "http://localhost:8080/", bytes.NewReader([]byte("http://vfdfbdfbd.com")))
 	request.Header.Add("Content-type", "text/plain")
 
+	data := make(map[string]string)
+
 	w := httptest.NewRecorder()
-	saveURL(w, request)
+	h := GetSaveURLHandler(&data)
+
+	h(w, request)
 
 	res := w.Result()
 	assert.Equal(t, 201, res.StatusCode)
@@ -31,4 +35,9 @@ func TestSaveUrl(t *testing.T) {
 		t.Error(err.Error())
 	}
 	require.NoError(t, err)
+}
+
+func TestGenerateID(t *testing.T) {
+	id := generateID()
+	require.Equal(t, 8, len(id))
 }
