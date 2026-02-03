@@ -1,35 +1,41 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"math/rand"
 	"net/http"
 	"strings"
-	"sync"
 	"time"
 
 	// "github.com/Vaha95/golang_pet/internal/handler"
 	"github.com/gorilla/mux"
 )
 
-type Storage struct {
-	data sync.Map
-}
+// type Storage struct {
+// 	data sync.Map
+// }
 
-func (s *Storage) Set(k string, v interface{}) {
-	s.data.Store(k, v)
-}
+// func (s *Storage) Set(k string, v interface{}) {
+// 	s.data.Store(k, v)
+// }
 
-func (s *Storage) Get(k string) (interface{}, bool) {
-	return s.data.Load(k)
-}
+// func (s *Storage) Get(k string) (interface{}, bool) {
+// 	return s.data.Load(k)
+// }
 
-func NewStorage () *Storage {
-	return &Storage{}
-}
+// func NewStorage () *Storage {
+// 	return &Storage{}
+// }
 
-var storage = NewStorage()
+// var storage = NewStorage()
+
+var urls map[string]string
+
+func init() {
+	urls = make(map[string]string)
+}
 
 func main() {
 	mux := mux.NewRouter()
@@ -65,7 +71,7 @@ func saveUrl(res http.ResponseWriter, req *http.Request) {
 	}
 
 	id := generateId()
-	storage.Set(id, reqBody)
+	urls[id] = string(reqBody)
 
 	res.WriteHeader(http.StatusCreated)
 	res.Header().Set("Content-type", "text/plain")
@@ -74,24 +80,26 @@ func saveUrl(res http.ResponseWriter, req *http.Request) {
  }
 
 func getUrl(res http.ResponseWriter, req *http.Request) {
-	// if req.Method != http.MethodGet {
-	// 	http.Error(res, "Only GET requests allowed!", http.StatusMethodNotAllowed)
-
-	// 	return
-	// }
 
 	vars := mux.Vars(req)
     id := vars["id"]
 
-	val, ok := storage.Get(id)
-	if !ok {		
+	val, ok := urls[id]
+	if !ok || val == "" {		
 		res.WriteHeader(http.StatusNotFound)
-		res.Write([]byte(""))
+		data, _ := json.Marshal(vars)
+		res.Write(data)
+
+		return
 	}
 
+	// res.Write([]byte(reflect.TypeOf(val).String()))
+
+	http.Redirect(res, req, fmt.Sprintf("http://%s", val), http.StatusTemporaryRedirect)
+	return
+
 	res.WriteHeader(http.StatusTemporaryRedirect)
-	res.Header().Set("content-type", "text/plain")
-	res.Header().Set("location", val.(string))
+	res.Header().Add("Location", fmt.Sprintf("http://%s", val))
 
 	res.Write([]byte(""))
 }
