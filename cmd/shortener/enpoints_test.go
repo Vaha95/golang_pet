@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"encoding/json"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -14,12 +13,7 @@ import (
 )
 
 func TestSaveUrl(t *testing.T) {
-	bodyBytes, err := json.Marshal("test.com")
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	request := httptest.NewRequest(http.MethodPost, "http://localhost:8080/", bytes.NewReader(bodyBytes))
+	request := httptest.NewRequest(http.MethodPost, "http://localhost:8080/", bytes.NewReader([]byte("http://vfdfbdfbd.com")))
 	request.Header.Add("Content-type", "text/plain")
 
 	w := httptest.NewRecorder()
@@ -32,7 +26,7 @@ func TestSaveUrl(t *testing.T) {
 
 	resBody, _ := io.ReadAll(res.Body)
 
-	_, err = url.Parse(string(resBody))
+	_, err := url.Parse(string(resBody))
 	if err != nil {
 		t.Error(err.Error())
 	}

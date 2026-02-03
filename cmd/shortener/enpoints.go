@@ -19,7 +19,7 @@ func init() {
 	urls = make(map[string]string)
 }
 
-func main() {
+func getEndpoints() {
 	mux := mux.NewRouter()
 
 	mux.HandleFunc(`/{id}`, getURL).Methods(http.MethodGet)
