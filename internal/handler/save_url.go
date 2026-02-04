@@ -8,44 +8,32 @@ import (
 	"net/url"
 	"strings"
 	"time"
+
+	echo "github.com/labstack/echo/v4"
 )
 
-func GetSaveURLHandler(data *map[string]string) (func(res http.ResponseWriter, req *http.Request)) {
-	saveURL := func (res http.ResponseWriter, req *http.Request)  {
-		if req.Method != http.MethodPost {
-			http.Error(res, "Only POST requests allowed!", http.StatusMethodNotAllowed)
-
-			return
-		}
-
+func GetSaveURLHandler(data *map[string]string) (func(c echo.Context) error) {
+	return func(c echo.Context) error {
+		req := c.Request()
 		defer req.Body.Close()
 		
 		reqBody, err := io.ReadAll(req.Body)
 
 		if err != nil {
-			http.Error(res, err.Error(), http.StatusBadRequest)
-
-			return				
+			return c.String(http.StatusBadRequest, err.Error())
 		}
 
 		inputURL := string(reqBody)
 		u, err := url.ParseRequestURI(inputURL)
 		if err != nil {
-			http.Error(res, err.Error(), http.StatusBadRequest)
-
-			return
+			return c.String(http.StatusBadRequest, err.Error())
 		}
 
 		id := generateID()
 		(*data)[id] = u.String()
-
-		res.WriteHeader(http.StatusCreated)
-		res.Header().Set("Content-type", "text/plain")
-
-		res.Write(fmt.Appendf(nil, "http://localhost:8080/%s", id))
+		
+		return c.String(http.StatusCreated, fmt.Sprintf("http://localhost:8080/%s", id))
 	}
-
-	return saveURL
 }
 
 func generateID() (string) {

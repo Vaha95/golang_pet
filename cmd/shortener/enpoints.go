@@ -1,23 +1,21 @@
 package main
 
 import (
-	"net/http"
-
 	"github.com/Vaha95/golang_pet/internal/handler"
-	"github.com/gorilla/mux"
+	echo "github.com/labstack/echo/v4"
 )
 
 func getEndpoints() {
-	mux := mux.NewRouter()
+	e := echo.New()
 
-	mux.HandleFunc(`/{id}`, handler.GetGetURLHandler(&Urls)).Methods(http.MethodGet)
-	mux.HandleFunc(`/`, handler.GetSaveURLHandler(&Urls)).Methods(http.MethodPost)
+	e.GET(`/:id`, handler.GetGetURLHandler(&Urls))
+	e.POST(`/`, handler.GetSaveURLHandler(&Urls))
 
-	listen(`localhost:8080`, mux)
+	listen(e, `localhost:8080`)
 }
 
-func listen(addr string, handler http.Handler) {
-	err := http.ListenAndServe(addr, handler)
+func listen(e *echo.Echo, addr string) {
+	err := e.Start(addr)
 	if err != nil {
 		panic(err)
 	}

@@ -10,6 +10,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	echo "github.com/labstack/echo/v4"
 )
 
 func TestSaveUrl(t *testing.T) {
@@ -21,7 +22,8 @@ func TestSaveUrl(t *testing.T) {
 	w := httptest.NewRecorder()
 	h := GetSaveURLHandler(&data)
 
-	h(w, request)
+	c := echo.New().NewContext(request, w)
+	h(c)
 
 	res := w.Result()
 	assert.Equal(t, 201, res.StatusCode)

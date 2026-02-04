@@ -3,23 +3,18 @@ package handler
 import (
 	"net/http"
 
-	"github.com/gorilla/mux"
+	echo "github.com/labstack/echo/v4"
 )
 
-func GetGetURLHandler(data *map[string]string) (func(res http.ResponseWriter, req *http.Request)) {
-	saveURL := func (res http.ResponseWriter, req *http.Request)  {
-	vars := mux.Vars(req)
-    id := vars["id"]
+func GetGetURLHandler(data *map[string]string) (func(c echo.Context) error) {
+	return func (c echo.Context) error {
+		id := c.Param("id")
 
-	val, ok := (*data)[id]
-	if !ok || val == "" {		
-		res.WriteHeader(http.StatusNotFound)
+		val, ok := (*data)[id]
+		if !ok || val == "" {
+			return c.String(http.StatusNotFound, "URL is not found")
+		}
 
-		return
+		return c.Redirect(http.StatusTemporaryRedirect, val)
 	}
-
-	http.Redirect(res, req, val, http.StatusTemporaryRedirect)
-	}
-
-	return saveURL
 }
