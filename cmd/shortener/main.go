@@ -17,7 +17,7 @@ func main() {
 	e := echo.New()
 
 	listenHost := flag.String("a", `localhost:8080`, "Host for app")
-	urlHost := flag.String("b", `localhost:8080`, "Host for url")
+	urlHost := flag.String("b", `http://localhost:8080`, "Host for url")
 	flag.Parse()
 
 	e.GET(`/:id`, handler.GetGetURLHandler(&Urls))

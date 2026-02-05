@@ -33,11 +33,11 @@ func GetSaveURLHandler(data *map[string]string, urlHost *string) (func(c echo.Co
 		(*data)[id] = u.String()
 
 		if urlHost == nil {
-			link := `localhost:8080`
+			link := `http://localhost:8080`
 			urlHost = &link
 		}
 
-		return c.String(http.StatusCreated, fmt.Sprintf("http://%s/%s", *urlHost, id))
+		return c.String(http.StatusCreated, fmt.Sprintf("%s/%s", *urlHost, id))
 	}
 }
 
