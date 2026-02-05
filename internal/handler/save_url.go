@@ -37,7 +37,7 @@ func GetSaveURLHandler(data *map[string]string, urlHost *string) (func(c echo.Co
 			urlHost = &link
 		}
 
-		return c.String(http.StatusCreated, fmt.Sprintf("%s/%s", *urlHost, id))
+		return c.String(http.StatusCreated, fmt.Sprintf("http://%s/%s", *urlHost, id))
 	}
 }
 
