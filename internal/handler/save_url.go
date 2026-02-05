@@ -12,7 +12,7 @@ import (
 	echo "github.com/labstack/echo/v4"
 )
 
-func GetSaveURLHandler(data *map[string]string) (func(c echo.Context) error) {
+func GetSaveURLHandler(data *map[string]string, urlHost *string) (func(c echo.Context) error) {
 	return func(c echo.Context) error {
 		req := c.Request()
 		defer req.Body.Close()
@@ -31,8 +31,13 @@ func GetSaveURLHandler(data *map[string]string) (func(c echo.Context) error) {
 
 		id := generateID()
 		(*data)[id] = u.String()
-		
-		return c.String(http.StatusCreated, fmt.Sprintf("http://localhost:8080/%s", id))
+
+		if urlHost == nil {
+			link := `localhost:8080`
+			urlHost = &link
+		}
+
+		return c.String(http.StatusCreated, fmt.Sprintf("%s/%s", *urlHost, id))
 	}
 }
 

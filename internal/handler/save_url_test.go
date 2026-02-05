@@ -20,7 +20,8 @@ func TestSaveUrl(t *testing.T) {
 	data := make(map[string]string)
 
 	w := httptest.NewRecorder()
-	h := GetSaveURLHandler(&data)
+	urlHost := `localhost:8080`
+	h := GetSaveURLHandler(&data, &urlHost)
 
 	c := echo.New().NewContext(request, w)
 	h(c)
