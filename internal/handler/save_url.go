@@ -58,7 +58,7 @@ func generateID(storage *repository.Storage) (string, error) {
 		}
 	}
 
-	return "", errors.New("ID generate is impossible.")
+	return "", errors.New("ID generate is impossible")
 }
 
 func generateHash() (string) {
