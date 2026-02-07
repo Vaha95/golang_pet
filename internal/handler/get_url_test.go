@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/Vaha95/golang_pet/internal/repository"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	echo "github.com/labstack/echo/v4"
@@ -13,14 +14,14 @@ import (
 
 func TestGetUrl(t *testing.T) {
 	url := "http://vfdfbdfbd.com"
-	id := generateID()
-	data := make(map[string]string)
-	data[id] = url
+	id := generateHash()
+	storage := repository.NewStorage()
+	storage.Set(id, url)
 
 	request := httptest.NewRequest(http.MethodGet, fmt.Sprintf("http://localhost:8080/%s", id), nil)
 	w := httptest.NewRecorder()
 
-	h := GetGetURLHandler(&data)
+	h := GetURLHandler(storage)
 
 	c := echo.New().NewContext(request, w)
 	c.SetParamNames("id")

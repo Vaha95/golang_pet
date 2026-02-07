@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"testing"
 
+	"github.com/Vaha95/golang_pet/internal/repository"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	echo "github.com/labstack/echo/v4"
@@ -17,11 +18,11 @@ func TestSaveUrl(t *testing.T) {
 	request := httptest.NewRequest(http.MethodPost, "http://localhost:8080/", bytes.NewReader([]byte("http://vfdfbdfbd.com")))
 	request.Header.Add("Content-type", "text/plain")
 
-	data := make(map[string]string)
+	storage := repository.NewStorage()
 
 	w := httptest.NewRecorder()
 	urlHost := `localhost:8080`
-	h := GetSaveURLHandler(&data, &urlHost)
+	h := GetSaveURLHandler(storage, &urlHost)
 
 	c := echo.New().NewContext(request, w)
 	h(c)
@@ -41,6 +42,6 @@ func TestSaveUrl(t *testing.T) {
 }
 
 func TestGenerateID(t *testing.T) {
-	id := generateID()
+	id := generateHash()
 	require.Equal(t, 8, len(id))
 }

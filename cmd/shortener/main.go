@@ -2,16 +2,12 @@ package main
 
 import (
 	"flag"
+	"log"
 
 	"github.com/Vaha95/golang_pet/internal/handler"
+	"github.com/Vaha95/golang_pet/internal/repository"
 	echo "github.com/labstack/echo/v4"
 )
-
-var Urls map[string]string
-
-func init() {
-	Urls = make(map[string]string)
-}
 
 func main() {
 	e := echo.New()
@@ -20,15 +16,19 @@ func main() {
 	urlHost := flag.String("b", `http://localhost:8080`, "Host for url")
 	flag.Parse()
 
-	e.GET(`/:id`, handler.GetGetURLHandler(&Urls))
-	e.POST(`/`, handler.GetSaveURLHandler(&Urls, urlHost))
+	storage := repository.NewStorage()
 
-	listen(e, *listenHost)
+	e.GET(`/:id`, handler.GetURLHandler(storage))
+	e.POST(`/`, handler.GetSaveURLHandler(storage, urlHost))
+
+	error := listen(e, *listenHost)
+	if error != nil {
+		log.Fatal(error.Error())
+	}
 }
 
-func listen(e *echo.Echo, addr string) {
+func listen(e *echo.Echo, addr string) error {
 	err := e.Start(addr)
-	if err != nil {
-		panic(err)
-	}
+
+	return err
 }
