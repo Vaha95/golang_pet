@@ -40,3 +40,8 @@ func TestSaveUrl(t *testing.T) {
 	}
 	require.NoError(t, err)
 }
+
+func TestGenerateHash(t *testing.T) {
+	id := generateHash()
+	require.Equal(t, 8, len(id))
+}

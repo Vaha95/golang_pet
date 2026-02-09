@@ -1,9 +1,14 @@
 package handler
 
 import (
+	"errors"
+	"fmt"
 	"io"
+	"math/rand"
 	"net/http"
 	"net/url"
+	"strings"
+	"time"
 
 	"github.com/Vaha95/golang_pet/internal/repository"
 	echo "github.com/labstack/echo/v4"
@@ -24,11 +29,9 @@ func GetSaveURLHandler(storage *repository.Storage, urlHost *string) (func(c ech
 			return c.String(http.StatusBadRequest, err.Error())
 		}
 
-		id, err := storage.Set(parsedURL.String())
+		id, err := setToStorage(storage, parsedURL.String())
 		if err != nil {
 			return c.String(http.StatusInternalServerError, err.Error())
-		} else if (id == "") {
-			return c.String(http.StatusInternalServerError, "Empty ID returned")
 		}
 
 		if urlHost == nil {
@@ -43,4 +46,34 @@ func GetSaveURLHandler(storage *repository.Storage, urlHost *string) (func(c ech
 
 		return c.String(http.StatusCreated, path)
 	}
+}
+
+func setToStorage(storage *repository.Storage, parsedURL string) (string, error) {
+	for i := 0; i < 10; i++ {
+		id := generateHash()
+		if err := storage.Set(id, parsedURL); err != nil {
+			if errors.Is(err, repository.ShortURLKeyAlreadyExistsError{}) {
+				continue
+			}
+			return "", fmt.Errorf("failed to save the short URL: %w", err)
+		}
+
+		return id, nil
+	}
+
+	return "", errors.New("ID generate is impossible")
+}
+
+func generateHash() string {
+	rand.New((rand.NewSource(time.Now().UnixNano())))
+	chars := []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
+		"abcdefghijklmnopqrstuvwxyz" +
+		"0123456789")
+	length := 8
+	var b strings.Builder
+	for i := 0; i < length; i++ {
+		b.WriteRune(chars[rand.Intn(len(chars))])
+	}
+
+	return b.String()
 }
