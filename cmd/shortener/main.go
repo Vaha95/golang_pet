@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 
 	"github.com/Vaha95/golang_pet/internal/handler"
@@ -23,7 +24,9 @@ func main() {
 
 	error := listen(e, *listenHost)
 	if error != nil {
-		log.Fatal(error.Error())
+		log.Fatal(
+			fmt.Errorf("Can`t start Web server: %w", error).Error(),
+		)
 	}
 }
 

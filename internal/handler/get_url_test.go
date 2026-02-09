@@ -14,9 +14,8 @@ import (
 
 func TestGetUrl(t *testing.T) {
 	url := "http://vfdfbdfbd.com"
-	id := generateHash()
 	storage := repository.NewStorage()
-	storage.Set(id, url)
+	id, _ := storage.Set(url)
 
 	request := httptest.NewRequest(http.MethodGet, fmt.Sprintf("http://localhost:8080/%s", id), nil)
 	w := httptest.NewRecorder()
