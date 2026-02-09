@@ -25,7 +25,7 @@ func main() {
 	error := listen(e, *listenHost)
 	if error != nil {
 		log.Fatal(
-			fmt.Errorf("Can`t start Web server: %w", error).Error(),
+			fmt.Errorf("can`t start Web server: %w", error).Error(),
 		)
 	}
 }
