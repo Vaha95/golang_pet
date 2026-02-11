@@ -31,7 +31,7 @@ func (s *Storage) Set(key string, val string) (err error) {
 
 	_, ok := s.data[key]
 	if ok {
-		return fmt.Errorf("%w: %s", ShortURLKeyAlreadyExistsError, key)
+		return fmt.Errorf("%w: %s", ErrorShortURLKeyAlreadyExists, key)
 	}
 
 	s.data[key] = val
