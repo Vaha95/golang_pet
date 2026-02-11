@@ -11,7 +11,7 @@ type Storage struct {
 	data map[string]string
 }
 
-var ShortURLKeyAlreadyExistsError = errors.New("short URL key already exists")
+var ErrorShortURLKeyAlreadyExists = errors.New("short URL key already exists")
 
 func NewStorage() *Storage {
 	return &Storage{
