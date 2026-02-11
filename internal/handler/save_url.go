@@ -52,7 +52,7 @@ func setToStorage(storage *repository.Storage, parsedURL string) (string, error)
 	for i := 0; i < 10; i++ {
 		id := generateHash()
 		if err := storage.Set(id, parsedURL); err != nil {
-			if errors.Is(err, repository.ShortURLKeyAlreadyExistsError{}) {
+			if errors.Is(err, repository.ShortURLKeyAlreadyExistsError) {
 				continue
 			}
 			return "", fmt.Errorf("failed to save the short URL: %w", err)

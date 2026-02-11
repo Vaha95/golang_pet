@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"errors"
 	"fmt"
 	"sync"
 )
@@ -10,16 +11,12 @@ type Storage struct {
 	data map[string]string
 }
 
-type ShortURLKeyAlreadyExistsError struct{}
+var ShortURLKeyAlreadyExistsError = errors.New("short URL key already exists")
 
 func NewStorage() *Storage {
 	return &Storage{
 		data: make(map[string]string),
 	}
-}
-
-func (e ShortURLKeyAlreadyExistsError) Error() string {
-	return "short URL key already exists"
 }
 
 func (s *Storage) Get(key string) (string, bool) {
@@ -34,18 +31,10 @@ func (s *Storage) Set(key string, val string) (err error) {
 
 	_, ok := s.data[key]
 	if ok {
-		err = ShortURLKeyAlreadyExistsError{}
-
-		return fmt.Errorf("%w: %s", err, key)
+		return fmt.Errorf("%w: %s", ShortURLKeyAlreadyExistsError, key)
 	}
 
 	s.data[key] = val
 
 	return nil
-}
-
-func (s *Storage) ExistKey(key string) bool {
-	_, ok := s.data[key]
-
-	return ok
 }
