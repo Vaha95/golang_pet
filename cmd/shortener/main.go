@@ -26,7 +26,7 @@ func main() {
 	e.GET(`/:id`, handler.GetURLHandler(storage))
 	e.POST(`/`, handler.GetSaveURLHandler(storage, &urls.urlHost))
 
-	err := e.Start(*&urls.listenHost)
+	err := e.Start(urls.listenHost)
 	if err != nil {
 		log.Fatal(
 			fmt.Errorf("can`t start Web server: %w", err).Error(),
@@ -52,10 +52,10 @@ func getUrls() Urls {
 		urls.listenHost = addr.data
 	}
 
-	type baseUrl struct {
+	type baseURL struct {
 		data string `env:"BASE_URL,required"`
 	}
-	var base baseUrl
+	var base baseURL
 	err = env.Parse(&base)
 	if err != nil || base.data == "" {
 		urls.urlHost = *urlHostFlag
