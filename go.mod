@@ -3,6 +3,7 @@ module github.com/Vaha95/golang_pet
 go 1.24.11
 
 require (
+	github.com/caarlos0/env/v6 v6.10.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-resty/resty/v2 v2.17.1 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
