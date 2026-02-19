@@ -8,7 +8,10 @@ import (
 	"github.com/Vaha95/golang_pet/internal/handler"
 	"github.com/Vaha95/golang_pet/internal/repository"
 	"github.com/caarlos0/env/v6"
-	echo "github.com/labstack/echo/v4"
+	"go.uber.org/zap"
+	"github.com/labstack/echo/v4"
+	
+	mv "github.com/Vaha95/golang_pet/internal/infrastructure/middleware"
 )
 
 type Urls struct {
@@ -18,15 +21,31 @@ type Urls struct {
 
 func main() {
 	e := echo.New()
+	logger, err := zap.NewDevelopment()
+	if err != nil {
+		log.Fatal(
+			fmt.Errorf("can`t start logger: %w", err).Error(),
+		)
+	}
+	defer logger.Sync()
+	sugar := logger.Sugar()
 
 	urls := getUrls()
 
 	storage := repository.NewStorage()
 
-	e.GET(`/:id`, handler.GetURLHandler(storage))
-	e.POST(`/`, handler.GetSaveURLHandler(storage, &urls.urlHost))
+	e.GET(
+		`/:id`,
+		handler.GetURLHandler(storage),
+	)
+	e.POST(
+		`/`, 
+		handler.GetSaveURLHandler(storage, &urls.urlHost),
+	)
 
-	err := e.Start(urls.listenHost)
+	mv.AddMiddlewares(e, sugar)
+
+	err = e.Start(urls.listenHost)
 	if err != nil {
 		log.Fatal(
 			fmt.Errorf("can`t start Web server: %w", err).Error(),
