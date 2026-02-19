@@ -3,13 +3,8 @@ package middleware
 import (
 	"time"
 	"go.uber.org/zap"
-
-	echo "github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4"
 )
-
-func AddMiddlewares(e *echo.Echo, l *zap.SugaredLogger) {
-	addLogMiddleware(e, l)
-}
 
 func addLogMiddleware(e *echo.Echo, l *zap.SugaredLogger) {
 	e.Use(func (next echo.HandlerFunc) echo.HandlerFunc {
@@ -22,11 +17,16 @@ func addLogMiddleware(e *echo.Echo, l *zap.SugaredLogger) {
 
 			err := next(c)
 
+			respCode := c.Response().Status
+			respSize := c.Response().Size
 			duration := time.Since(start)
+			
 			l.Infoln(
 				"uri", uri,
 				"method", method,
 				"duration", duration,
+				"respCode", respCode,
+				"respSize", respSize,
 				"err", err,
 			)
 
