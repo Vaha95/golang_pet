@@ -26,7 +26,7 @@ func GetSaveURLHandler(storage *repository.Storage, urlHost *string) (func(c ech
 			urlHost = &link
 		}
 
-		path, err := saveurl.SaveUrl(inputURL, storage, *urlHost)
+		path, err := saveurl.SaveURL(inputURL, storage, *urlHost)
 		if err != nil {
 			switch errors.Is(err, saveurl.ErrorSaveToStorage) {
 				case true:

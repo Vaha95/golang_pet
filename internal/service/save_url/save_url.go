@@ -11,7 +11,7 @@ import (
 	"github.com/Vaha95/golang_pet/internal/repository"
 )
 
-func SaveUrl(inputURL string, storage *repository.Storage, urlHost string) (string, error) {
+func SaveURL(inputURL string, storage *repository.Storage, urlHost string) (string, error) {
 		parsedURL, err := url.ParseRequestURI(inputURL)
 		if err != nil {
 			return "", fmt.Errorf("%w: %s", ErrorParseRequestURI, parsedURL)

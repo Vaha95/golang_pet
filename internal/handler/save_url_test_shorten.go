@@ -11,7 +11,7 @@ import (
 	"github.com/Vaha95/golang_pet/internal/repository"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	echo "github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4"
 )
 
 func TestSaveUrlShorten(t *testing.T) {
@@ -29,12 +29,15 @@ func TestSaveUrlShorten(t *testing.T) {
 
 	res := w.Result()
 	assert.Equal(t, 201, res.StatusCode)
+	assert.Equal(t, echo.MIMEApplicationJSON, w.Header().Get(echo.HeaderContentType))
+	_, err := url.ParseRequestURI(w.Body.String())
+	require.NoError(t, err)
 
 	defer res.Body.Close()
 
 	resBody, _ := io.ReadAll(res.Body)
 
-	_, err := url.Parse(string(resBody))
+	_, err = url.Parse(string(resBody))
 	if err != nil {
 		t.Error(err.Error())
 	}
