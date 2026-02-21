@@ -28,9 +28,9 @@ func TestSaveUrl(t *testing.T) {
 	h(c)
 
 	res := w.Result()
-	assert.Equal(t, 201, res.StatusCode)
-
 	defer res.Body.Close()
+
+	assert.Equal(t, 201, res.StatusCode)
 
 	resBody, _ := io.ReadAll(res.Body)
 
@@ -55,5 +55,7 @@ func TestInvalidUrl(t *testing.T) {
 	h(c)
 
 	res := w.Result()
+	defer res.Body.Close()
+	
 	assert.Equal(t, 400, res.StatusCode)
 }
