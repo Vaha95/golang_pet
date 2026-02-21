@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/Vaha95/golang_pet/internal/repository"
+	"github.com/Vaha95/golang_pet/internal/service/save_url"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	echo "github.com/labstack/echo/v4"
@@ -15,7 +16,7 @@ import (
 func TestGetUrl(t *testing.T) {
 	url := "http://vfdfbdfbd.com"
 	storage := repository.NewStorage()
-	id := generateHash()
+	id := saveurl.GenerateHash()
 	storage.Set(id, url)
 
 	request := httptest.NewRequest(http.MethodGet, fmt.Sprintf("http://localhost:8080/%s", id), nil)

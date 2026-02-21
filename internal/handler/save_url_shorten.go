@@ -2,7 +2,6 @@ package handler
 
 import (
 	"errors"
-	"io"
 	"net/http"
 
 	"github.com/Vaha95/golang_pet/internal/repository"
@@ -10,23 +9,23 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func GetSaveURLHandler(storage *repository.Storage, urlHost *string) (func(c echo.Context) error) {
+func GetSaveURLShortenHandler(storage *repository.Storage, urlHost *string) (func(c echo.Context) error) {
 	return func(c echo.Context) error {
-		req := c.Request()
-		
-		reqBody, err := io.ReadAll(req.Body)
-		if err != nil {
-			return c.String(http.StatusBadRequest, err.Error())
+		type Data struct {
+			URI string `json:"url"`
 		}
+		var data Data
 
-		inputURL := string(reqBody)
+		if err := c.Bind(&data); err != nil {
+			return c.String(http.StatusBadRequest, err.Error()) 
+		}
 
 		if urlHost == nil {
 			link := `http://localhost:8080`
 			urlHost = &link
 		}
 
-		path, err := saveurl.SaveUrl(inputURL, storage, *urlHost)
+		path, err := saveurl.SaveUrl(data.URI, storage, *urlHost)
 		if err != nil {
 			switch errors.Is(err, saveurl.ErrorSaveToStorage) {
 				case true:
@@ -36,6 +35,6 @@ func GetSaveURLHandler(storage *repository.Storage, urlHost *string) (func(c ech
 			}	
 		}
 
-		return c.String(http.StatusCreated, path)
+		return c.JSON(http.StatusCreated, path)
 	}
 }

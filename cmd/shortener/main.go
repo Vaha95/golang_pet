@@ -10,7 +10,7 @@ import (
 	"github.com/caarlos0/env/v6"
 	"go.uber.org/zap"
 	"github.com/labstack/echo/v4"
-	
+
 	mv "github.com/Vaha95/golang_pet/internal/infrastructure/middleware"
 )
 
@@ -34,14 +34,9 @@ func main() {
 
 	storage := repository.NewStorage()
 
-	e.GET(
-		`/:id`,
-		handler.GetURLHandler(storage),
-	)
-	e.POST(
-		`/`, 
-		handler.GetSaveURLHandler(storage, &urls.urlHost),
-	)
+	e.GET(`/:id`, handler.GetURLHandler(storage))
+	e.POST(`/`, handler.GetSaveURLHandler(storage, &urls.urlHost))
+	e.POST(`/api/shorten`, handler.GetSaveURLShortenHandler(storage, &urls.urlHost))
 
 	mv.AddMiddlewares(e, sugar)
 
