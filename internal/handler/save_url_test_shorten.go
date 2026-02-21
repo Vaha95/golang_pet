@@ -14,7 +14,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func TestSaveUrlShorten(t *testing.T) {
+func TestSaveURLShorten(t *testing.T) {
 	request := httptest.NewRequest(http.MethodPost, "http://localhost:8080/", bytes.NewReader([]byte("http://vfdfbdfbd.com")))
 	request.Header.Add("Content-type", "text/plain")
 
@@ -44,7 +44,7 @@ func TestSaveUrlShorten(t *testing.T) {
 	require.NoError(t, err)
 }
 
-func TestInvalidUrlShorten(t *testing.T) {
+func TestInvalidURLShorten(t *testing.T) {
 	request := httptest.NewRequest(http.MethodPost, "http://localhost:8080/", bytes.NewReader([]byte("this is not URL")))
 	request.Header.Add("Content-type", "text/plain")
 
