@@ -28,12 +28,12 @@ func TestSaveUrlShorten(t *testing.T) {
 	h(c)
 
 	res := w.Result()
+	defer res.Body.Close()
+
 	assert.Equal(t, 201, res.StatusCode)
 	assert.Equal(t, echo.MIMEApplicationJSON, w.Header().Get(echo.HeaderContentType))
 	_, err := url.ParseRequestURI(w.Body.String())
 	require.NoError(t, err)
-
-	defer res.Body.Close()
 
 	resBody, _ := io.ReadAll(res.Body)
 
@@ -58,5 +58,7 @@ func TestInvalidUrlShorten(t *testing.T) {
 	h(c)
 
 	res := w.Result()
+	defer res.Body.Close()
+
 	assert.Equal(t, 400, res.StatusCode)
 }
