@@ -8,7 +8,7 @@ import (
 
 func addLogMiddleware(e *echo.Echo, l *zap.SugaredLogger) {
 	e.Use(func (next echo.HandlerFunc) echo.HandlerFunc {
-		logFn := func(c echo.Context) error {
+		return func(c echo.Context) error {
 			start := time.Now()
 
 			req := *c.Request()
@@ -32,7 +32,5 @@ func addLogMiddleware(e *echo.Echo, l *zap.SugaredLogger) {
 
 			return err
 		}
-
-		return logFn
 	})
 }

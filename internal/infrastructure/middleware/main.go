@@ -6,5 +6,6 @@ import (
 )
 
 func AddMiddlewares(e *echo.Echo, l *zap.SugaredLogger) {
+	addEncodeMiddleware(e)
 	addLogMiddleware(e, l)
 }
