@@ -2,17 +2,19 @@ package repository
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
 )
 
 const (
-	FilenameDirPrefix = `./var/storage/data`;
+	MainDir = `./var`
+	FilenameDirPrefix = MainDir + `/storage/data`;
 	Filename = `urls-data.json`
 )
 
-func createFileIfNotExist () {
+func createFileIfNotExist () error {
 	fullPath := getFullPath()
 	dir := filepath.Dir(fullPath)
 
@@ -31,9 +33,33 @@ func createFileIfNotExist () {
 		file, err = getFile(fullPath)
 	}
 
+	if err != nil {
+		return err
+	}
+
 	defer file.Close()
+
+	return nil
 }
 
 func getFullPath () string {
 	return filepath.Join(FilenameDirPrefix, "/", Filename)
+}
+
+func createNewFile(fullPath string) (*os.File, error) {
+	file, err := os.Create(fullPath)
+	if err != nil {
+		return nil, fmt.Errorf("can`t storage file: %w", err)
+	}
+
+	return file, err
+}
+
+func getFile(fullPath string) (*os.File, error) {
+	file, err := os.OpenFile(fullPath, os.O_EXCL|os.O_WRONLY, 0644)
+	if err != nil {
+		return nil, fmt.Errorf("can`t storage file: %w", err)
+	}
+
+	return file, err
 }

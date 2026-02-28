@@ -19,7 +19,7 @@ func TestSaveURL(t *testing.T) {
 
 	w := httptest.NewRecorder()
 	urlHost := `localhost:8080`
-	h := GetSaveURLHandler(&urlHost)
+	h := GetSaveURLHandler(urlHost)
 
 	c := echo.New().NewContext(request, w)
 	h(c)
@@ -44,7 +44,7 @@ func TestInvalidURL(t *testing.T) {
 
 	w := httptest.NewRecorder()
 	urlHost := `localhost:8080`
-	h := GetSaveURLHandler(&urlHost)
+	h := GetSaveURLHandler(urlHost)
 
 	c := echo.New().NewContext(request, w)
 	h(c)

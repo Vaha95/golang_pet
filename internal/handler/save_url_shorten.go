@@ -8,7 +8,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func GetSaveURLShortenHandler(urlHost *string) (func(c echo.Context) error) {
+func GetSaveURLShortenHandler(urlHost string) (func(c echo.Context) error) {
 	return func(c echo.Context) error {
 		type APIReqiest struct {
 			URI string `json:"url"`
@@ -19,12 +19,7 @@ func GetSaveURLShortenHandler(urlHost *string) (func(c echo.Context) error) {
 			return c.String(http.StatusBadRequest, err.Error()) 
 		}
 
-		if urlHost == nil {
-			link := `http://localhost:8080`
-			urlHost = &link
-		}
-
-		path, err := saveurl.SaveURL(data.URI, *urlHost)
+		path, err := saveurl.SaveURL(data.URI, urlHost)
 		if err != nil {
 			switch errors.Is(err, saveurl.ErrorSaveToStorage) {
 				case true:
