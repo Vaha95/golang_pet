@@ -21,7 +21,7 @@ func TestSaveURL(t *testing.T) {
 	w := httptest.NewRecorder()
 	cfg := config.Config{
 		ListenHost: `localhost:8080`,
-		UrlHost: `http://localhost:8080`,
+		URLHost: `http://localhost:8080`,
 		FilePath: ``,
 	}
 	h := GetSaveURLHandler(cfg)
@@ -50,7 +50,7 @@ func TestInvalidURL(t *testing.T) {
 	w := httptest.NewRecorder()
 	cfg := config.Config{
 		ListenHost: `localhost:8080`,
-		UrlHost: `http://localhost:8080`,
+		URLHost: `http://localhost:8080`,
 		FilePath: ``,
 	}
 	h := GetSaveURLHandler(cfg)

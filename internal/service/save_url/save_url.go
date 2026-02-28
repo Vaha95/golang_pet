@@ -23,14 +23,14 @@ func SaveURL(cfg config.Config, inputURL string) (string, error) {
 			return "", fmt.Errorf("%w: %s", ErrorSaveToStorage, parsedURL)
 		}
 
-	return url.JoinPath(cfg.UrlHost, id)
+	return url.JoinPath(cfg.URLHost, id)
 
 }
 
 func setToStorage(cfg config.Config, parsedURL string) (string, error) {
 	for i := 0; i < 10; i++ {
 		id := GenerateHash()
-		if err := repository.SetUrl(cfg, id, parsedURL); err != nil {
+		if err := repository.SetURL(cfg, id, parsedURL); err != nil {
 			if errors.Is(err, repository.ErrorShortURLKeyAlreadyExists) {
 				continue
 			}

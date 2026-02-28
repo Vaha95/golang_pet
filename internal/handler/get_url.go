@@ -13,7 +13,7 @@ func GetURLHandler(cfg config.Config) (func(c echo.Context) error) {
 	return func (c echo.Context) error {
 		id := c.Param("id")
 
-		val, err := repository.GetUrlByKey(cfg, id)
+		val, err := repository.GetURLByKey(cfg, id)
 		if err != nil && errors.Is(err, repository.ErrorShortURLKeyNotFound) {
 			return c.String(http.StatusNotFound, "URL is not found")			
 		}

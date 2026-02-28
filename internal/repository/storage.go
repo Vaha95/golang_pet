@@ -22,7 +22,7 @@ func NewStorage() *Storage {
 	}
 }
 
-func GetUrlByKey(cfg config.Config, key string) (string, error) {
+func GetURLByKey(cfg config.Config, key string) (string, error) {
 	data, err := ReadStore(cfg)
 	if err != nil {
 		return "", err
@@ -38,8 +38,12 @@ func GetUrlByKey(cfg config.Config, key string) (string, error) {
 	return val, nil
 }
 
-func SetUrl(cfg config.Config, key string, val string) (err error) {
+func SetURL(cfg config.Config, key string, val string) (err error) {
 	data, err := ReadStore(cfg)
+	if err != nil {
+		return err
+	}
+
 	_, ok := data[key]
 	if ok {
 		return fmt.Errorf("%w: %s", ErrorShortURLKeyAlreadyExists, key)

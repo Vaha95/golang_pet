@@ -7,7 +7,7 @@ import (
 
 type Config struct {
 	ListenHost string
-	UrlHost string
+	URLHost string
 	FilePath string
 }
 
@@ -38,7 +38,7 @@ func GetConfig() Config {
 
 	return Config{
 		ListenHost: listenHost,
-		UrlHost: urlHost,
+		URLHost: urlHost,
 		FilePath: filePath,
 	}
 }

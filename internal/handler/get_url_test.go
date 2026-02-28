@@ -19,12 +19,12 @@ func TestGetUrl(t *testing.T) {
 
 	cfg := config.Config{
 		ListenHost: `localhost:8080`,
-		UrlHost: `http://localhost:8080`,
+		URLHost: `http://localhost:8080`,
 		FilePath: ``,
 	}
 
 	id := saveurl.GenerateHash()
-	repository.SetUrl(cfg, id, url)
+	repository.SetURL(cfg, id, url)
 
 	request := httptest.NewRequest(http.MethodGet, fmt.Sprintf("http://localhost:8080/%s", id), nil)
 	w := httptest.NewRecorder()
