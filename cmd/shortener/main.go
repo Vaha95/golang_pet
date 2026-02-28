@@ -16,9 +16,9 @@ func main() {
 
 	cfg := config.GetConfig()
 
-	e.GET(`/:id`, handler.GetURLHandler())
-	e.POST(`/`, handler.GetSaveURLHandler(cfg.UrlHost))
-	e.POST(`/api/shorten`, handler.GetSaveURLShortenHandler(cfg.UrlHost))
+	e.GET(`/:id`, handler.GetURLHandler(cfg))
+	e.POST(`/`, handler.GetSaveURLHandler(cfg))
+	e.POST(`/api/shorten`, handler.GetSaveURLShortenHandler(cfg))
 
 	err := mv.AddMiddlewares(e)
 	if err != nil {

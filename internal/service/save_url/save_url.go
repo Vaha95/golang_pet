@@ -8,28 +8,29 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Vaha95/golang_pet/internal/config"
 	"github.com/Vaha95/golang_pet/internal/repository"
 )
 
-func SaveURL(inputURL string, urlHost string) (string, error) {
+func SaveURL(cfg config.Config, inputURL string) (string, error) {
 		parsedURL, err := url.ParseRequestURI(inputURL)
 		if err != nil {
 			return "", fmt.Errorf("%w: %s", ErrorParseRequestURI, parsedURL)
 		}
 
-		id, err := setToStorage(parsedURL.String())
+		id, err := setToStorage(cfg, parsedURL.String())
 		if err != nil {
 			return "", fmt.Errorf("%w: %s", ErrorSaveToStorage, parsedURL)
 		}
 
-	return url.JoinPath(urlHost, id)
+	return url.JoinPath(cfg.UrlHost, id)
 
 }
 
-func setToStorage(parsedURL string) (string, error) {
+func setToStorage(cfg config.Config, parsedURL string) (string, error) {
 	for i := 0; i < 10; i++ {
 		id := GenerateHash()
-		if err := repository.SetUrl(id, parsedURL); err != nil {
+		if err := repository.SetUrl(cfg, id, parsedURL); err != nil {
 			if errors.Is(err, repository.ErrorShortURLKeyAlreadyExists) {
 				continue
 			}

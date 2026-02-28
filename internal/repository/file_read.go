@@ -4,20 +4,22 @@ import (
 	"encoding/json"
 	"os"
 	"sync"
+
+	"github.com/Vaha95/golang_pet/internal/config"
 )
 
 var rmu sync.RWMutex
 
-func ReadStore() (map[string]string, error) {
+func ReadStore(cfg config.Config) (map[string]string, error) {
 	rmu.RLock()
 	defer rmu.RUnlock()
 
-	err := createFileIfNotExist()
+	err := createFileIfNotExist(cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	filePath := getFullPath()
+	filePath := getFullPath(cfg)
 	data, err := os.ReadFile(filePath)
 	if os.IsNotExist(err) {
 		return map[string]string{}, nil
@@ -30,6 +32,6 @@ func ReadStore() (map[string]string, error) {
 	if err := json.Unmarshal(data, &store); err != nil {
 		return nil, err
 	}
-	
+
 	return store, nil
 }

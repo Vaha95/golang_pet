@@ -8,9 +8,10 @@ import (
 	"net/url"
 	"testing"
 
+	"github.com/Vaha95/golang_pet/internal/config"
+	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/labstack/echo/v4"
 )
 
 func TestSaveURLShorten(t *testing.T) {
@@ -18,8 +19,12 @@ func TestSaveURLShorten(t *testing.T) {
 	request.Header.Add("Content-type", "text/plain")
 
 	w := httptest.NewRecorder()
-	urlHost := `localhost:8080`
-	h := GetSaveURLHandler(urlHost)
+	cfg := config.Config{
+		ListenHost: `localhost:8080`,
+		UrlHost: `http://localhost:8080`,
+		FilePath: ``,
+	}
+	h := GetSaveURLHandler(cfg)
 
 	c := echo.New().NewContext(request, w)
 	h(c)
@@ -46,8 +51,12 @@ func TestInvalidURLShorten(t *testing.T) {
 	request.Header.Add("Content-type", "text/plain")
 
 	w := httptest.NewRecorder()
-	urlHost := `localhost:8080`
-	h := GetSaveURLHandler(urlHost)
+	cfg := config.Config{
+		ListenHost: `localhost:8080`,
+		UrlHost: `http://localhost:8080`,
+		FilePath: ``,
+	}
+	h := GetSaveURLHandler(cfg)
 
 	c := echo.New().NewContext(request, w)
 	h(c)

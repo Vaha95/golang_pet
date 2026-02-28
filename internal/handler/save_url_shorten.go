@@ -4,11 +4,12 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/Vaha95/golang_pet/internal/config"
 	"github.com/Vaha95/golang_pet/internal/service/save_url"
 	"github.com/labstack/echo/v4"
 )
 
-func GetSaveURLShortenHandler(urlHost string) (func(c echo.Context) error) {
+func GetSaveURLShortenHandler(cfg config.Config) (func(c echo.Context) error) {
 	return func(c echo.Context) error {
 		type APIReqiest struct {
 			URI string `json:"url"`
@@ -19,7 +20,7 @@ func GetSaveURLShortenHandler(urlHost string) (func(c echo.Context) error) {
 			return c.String(http.StatusBadRequest, err.Error()) 
 		}
 
-		path, err := saveurl.SaveURL(data.URI, urlHost)
+		path, err := saveurl.SaveURL(cfg, data.URI)
 		if err != nil {
 			switch errors.Is(err, saveurl.ErrorSaveToStorage) {
 				case true:

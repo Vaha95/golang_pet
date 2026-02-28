@@ -4,15 +4,17 @@ import (
 	"encoding/json"
 	"os"
 	"sync"
+
+	"github.com/Vaha95/golang_pet/internal/config"
 )
 
 var mu sync.RWMutex
 
-func WriteStore(store map[string]string) error {
+func WriteStore(cfg config.Config, store map[string]string) error {
 	mu.Lock()
 	defer mu.Unlock()
 
-	err := createFileIfNotExist()
+	err := createFileIfNotExist(cfg)
 	if err != nil {
 		return err
 	}
@@ -21,7 +23,7 @@ func WriteStore(store map[string]string) error {
 	if err != nil {
 		return err
 	}
-	filePath := getFullPath()
+	filePath := getFullPath(cfg)
 
 	return os.WriteFile(filePath, data, 0644)
 }

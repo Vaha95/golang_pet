@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"sync"
+
+	"github.com/Vaha95/golang_pet/internal/config"
 )
 
 type Storage struct {
@@ -20,8 +22,8 @@ func NewStorage() *Storage {
 	}
 }
 
-func GetUrlByKey(key string) (string, error) {
-	data, err := ReadStore()
+func GetUrlByKey(cfg config.Config, key string) (string, error) {
+	data, err := ReadStore(cfg)
 	if err != nil {
 		return "", err
 	}
@@ -36,8 +38,8 @@ func GetUrlByKey(key string) (string, error) {
 	return val, nil
 }
 
-func SetUrl(key string, val string) (err error) {
-	data, err := ReadStore()
+func SetUrl(cfg config.Config, key string, val string) (err error) {
+	data, err := ReadStore(cfg)
 	_, ok := data[key]
 	if ok {
 		return fmt.Errorf("%w: %s", ErrorShortURLKeyAlreadyExists, key)
@@ -47,7 +49,7 @@ func SetUrl(key string, val string) (err error) {
 	}
 
 	data[key] = val
-	WriteStore(data)
+	WriteStore(cfg, data)
 
 	return nil
 }

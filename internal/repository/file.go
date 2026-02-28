@@ -16,8 +16,8 @@ const (
 	Filename = `urls-data.json`
 )
 
-func createFileIfNotExist () error {
-	fullPath := getFullPath()
+func createFileIfNotExist (cfg config.Config) error {
+	fullPath := getFullPath(cfg)
 	dir := filepath.Dir(fullPath)
 
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
@@ -44,10 +44,9 @@ func createFileIfNotExist () error {
 	return nil
 }
 
-func getFullPath () string {
-	cfg := config.GetConfig()
+func getFullPath (cfg config.Config) string {
 	filePath := cfg.FilePath
-	if filePath != `` {
+	if filePath == `` {
 		filePath = filepath.Join(FilenameDirPrefix, "/", Filename)
 	}
 

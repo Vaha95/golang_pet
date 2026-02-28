@@ -6,22 +6,29 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/Vaha95/golang_pet/internal/config"
 	"github.com/Vaha95/golang_pet/internal/repository"
 	"github.com/Vaha95/golang_pet/internal/service/save_url"
+	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	echo "github.com/labstack/echo/v4"
 )
 
 func TestGetUrl(t *testing.T) {
 	url := "http://vfdfbdfbd.com"
+
+	cfg := config.Config{
+		ListenHost: `localhost:8080`,
+		UrlHost: `http://localhost:8080`,
+		FilePath: ``,
+	}
+
 	id := saveurl.GenerateHash()
-	repository.SetUrl(id, url)
+	repository.SetUrl(cfg, id, url)
 
 	request := httptest.NewRequest(http.MethodGet, fmt.Sprintf("http://localhost:8080/%s", id), nil)
 	w := httptest.NewRecorder()
-
-	h := GetURLHandler()
+	h := GetURLHandler(cfg)
 
 	c := echo.New().NewContext(request, w)
 	c.SetParamNames("id")
