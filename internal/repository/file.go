@@ -6,6 +6,8 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+
+	"github.com/Vaha95/golang_pet/internal/config"
 )
 
 const (
@@ -43,7 +45,13 @@ func createFileIfNotExist () error {
 }
 
 func getFullPath () string {
-	return filepath.Join(FilenameDirPrefix, "/", Filename)
+	cfg := config.GetConfig()
+	filePath := cfg.FilePath
+	if filePath != `` {
+		filePath = filepath.Join(FilenameDirPrefix, "/", Filename)
+	}
+
+	return filePath
 }
 
 func createNewFile(fullPath string) (*os.File, error) {
