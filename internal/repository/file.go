@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -58,6 +59,12 @@ func createNewFile(fullPath string) (*os.File, error) {
 	if err != nil {
 		return nil, fmt.Errorf("can`t storage file: %w", err)
 	}
+	
+	defValue, err := json.Marshal(map[string]string{})
+	if err != nil {
+		return nil, fmt.Errorf("can`t storage file: %w", err)
+	}
+	file.Write(defValue)
 
 	return file, err
 }
