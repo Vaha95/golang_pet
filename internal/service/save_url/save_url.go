@@ -11,13 +11,13 @@ import (
 	"github.com/Vaha95/golang_pet/internal/repository"
 )
 
-func SaveURL(inputURL string, storage *repository.Storage, urlHost string) (string, error) {
+func SaveURL(inputURL string, urlHost string) (string, error) {
 		parsedURL, err := url.ParseRequestURI(inputURL)
 		if err != nil {
 			return "", fmt.Errorf("%w: %s", ErrorParseRequestURI, parsedURL)
 		}
 
-		id, err := setToStorage(storage, parsedURL.String())
+		id, err := setToStorage(parsedURL.String())
 		if err != nil {
 			return "", fmt.Errorf("%w: %s", ErrorSaveToStorage, parsedURL)
 		}
@@ -26,10 +26,10 @@ func SaveURL(inputURL string, storage *repository.Storage, urlHost string) (stri
 
 }
 
-func setToStorage(storage *repository.Storage, parsedURL string) (string, error) {
+func setToStorage(parsedURL string) (string, error) {
 	for i := 0; i < 10; i++ {
 		id := GenerateHash()
-		if err := storage.Set(id, parsedURL); err != nil {
+		if err := repository.SetUrl(id, parsedURL); err != nil {
 			if errors.Is(err, repository.ErrorShortURLKeyAlreadyExists) {
 				continue
 			}

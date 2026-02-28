@@ -15,14 +15,13 @@ import (
 
 func TestGetUrl(t *testing.T) {
 	url := "http://vfdfbdfbd.com"
-	storage := repository.NewStorage()
 	id := saveurl.GenerateHash()
-	storage.Set(id, url)
+	repository.SetUrl(id, url)
 
 	request := httptest.NewRequest(http.MethodGet, fmt.Sprintf("http://localhost:8080/%s", id), nil)
 	w := httptest.NewRecorder()
 
-	h := GetURLHandler(storage)
+	h := GetURLHandler()
 
 	c := echo.New().NewContext(request, w)
 	c.SetParamNames("id")

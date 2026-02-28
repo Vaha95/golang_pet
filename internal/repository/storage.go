@@ -12,6 +12,7 @@ type Storage struct {
 }
 
 var ErrorShortURLKeyAlreadyExists = errors.New("short URL key already exists")
+var ErrorShortURLKeyNotFound = errors.New("short URL key already exists")
 
 func NewStorage() *Storage {
 	return &Storage{
@@ -19,22 +20,34 @@ func NewStorage() *Storage {
 	}
 }
 
-func (s *Storage) Get(key string) (string, bool) {
-	val, ok := s.data[key]
+func GetUrlByKey(key string) (string, error) {
+	data, err := ReadStore()
+	if err != nil {
+		return "", err
+	}
+	if data == nil {
+		data = map[string]string{}
+	}
+	val, ok := data[key]
+	if !ok {
+		return "", fmt.Errorf("%w: %s", ErrorShortURLKeyNotFound, key)
+	}
 
-	return val, ok
+	return val, nil
 }
 
-func (s *Storage) Set(key string, val string) (err error) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
-	_, ok := s.data[key]
+func SetUrl(key string, val string) (err error) {
+	data, err := ReadStore()
+	_, ok := data[key]
 	if ok {
 		return fmt.Errorf("%w: %s", ErrorShortURLKeyAlreadyExists, key)
 	}
+	if data == nil {
+		data = map[string]string{}
+	}
 
-	s.data[key] = val
+	data[key] = val
+	WriteStore(data)
 
 	return nil
 }

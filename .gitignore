@@ -22,3 +22,6 @@ vendor/
 .idea
 .vscode
 cmd/shortener/shortenertest_v2
+
+# Cache
+var/

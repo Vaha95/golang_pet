@@ -5,12 +5,11 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/Vaha95/golang_pet/internal/repository"
 	"github.com/Vaha95/golang_pet/internal/service/save_url"
 	"github.com/labstack/echo/v4"
 )
 
-func GetSaveURLHandler(storage *repository.Storage, urlHost *string) (func(c echo.Context) error) {
+func GetSaveURLHandler(urlHost *string) (func(c echo.Context) error) {
 	return func(c echo.Context) error {
 		req := c.Request()
 		
@@ -26,7 +25,7 @@ func GetSaveURLHandler(storage *repository.Storage, urlHost *string) (func(c ech
 			urlHost = &link
 		}
 
-		path, err := saveurl.SaveURL(inputURL, storage, *urlHost)
+		path, err := saveurl.SaveURL(inputURL, *urlHost)
 		if err != nil {
 			switch errors.Is(err, saveurl.ErrorSaveToStorage) {
 				case true:
