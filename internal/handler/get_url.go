@@ -15,10 +15,10 @@ func GetURLHandler(cfg config.Config) (func(c echo.Context) error) {
 
 		val, err := repository.GetURLByKey(cfg, id)
 		if err != nil && errors.Is(err, repository.ErrorShortURLKeyNotFound) {
-			return c.String(http.StatusNotFound, "URL is not found")			
+			return c.JSON(http.StatusNotFound, "URL is not found")			
 		}
 		if val == "" {
-			return c.String(http.StatusInternalServerError, err.Error())	
+			return c.JSON(http.StatusInternalServerError, err.Error())
 		}
 
 		return c.Redirect(http.StatusTemporaryRedirect, val)

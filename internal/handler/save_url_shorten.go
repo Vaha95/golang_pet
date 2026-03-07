@@ -17,16 +17,16 @@ func GetSaveURLShortenHandler(cfg config.Config) (func(c echo.Context) error) {
 		var data APIReqiest
 
 		if err := c.Bind(&data); err != nil {
-			return c.String(http.StatusBadRequest, err.Error()) 
+			return c.JSON(http.StatusBadRequest, err.Error()) 
 		}
 
 		path, err := saveurl.SaveURL(cfg, data.URI)
 		if err != nil {
 			switch errors.Is(err, saveurl.ErrorSaveToStorage) {
 				case true:
-					c.String(http.StatusInternalServerError, err.Error())							
+					c.JSON(http.StatusInternalServerError, err.Error())							
 				default:
-					c.String(http.StatusBadRequest, err.Error())
+					c.JSON(http.StatusBadRequest, err.Error())
 			}	
 		}
 

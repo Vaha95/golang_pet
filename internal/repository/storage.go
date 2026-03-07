@@ -3,24 +3,12 @@ package repository
 import (
 	"errors"
 	"fmt"
-	"sync"
 
 	"github.com/Vaha95/golang_pet/internal/config"
 )
 
-type Storage struct {
-	mu   sync.RWMutex
-	data map[string]string
-}
-
 var ErrorShortURLKeyAlreadyExists = errors.New("short URL key already exists")
 var ErrorShortURLKeyNotFound = errors.New("short URL key already exists")
-
-func NewStorage() *Storage {
-	return &Storage{
-		data: make(map[string]string),
-	}
-}
 
 func GetURLByKey(cfg config.Config, key string) (string, error) {
 	data, err := ReadStore(cfg)

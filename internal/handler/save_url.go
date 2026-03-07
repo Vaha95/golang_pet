@@ -16,7 +16,7 @@ func GetSaveURLHandler(cfg config.Config) (func(c echo.Context) error) {
 		
 		reqBody, err := io.ReadAll(req.Body)
 		if err != nil {
-			return c.String(http.StatusBadRequest, err.Error())
+			return c.JSON(http.StatusBadRequest, err.Error())
 		}
 
 		inputURL := string(reqBody)
@@ -25,9 +25,9 @@ func GetSaveURLHandler(cfg config.Config) (func(c echo.Context) error) {
 		if err != nil {
 			switch errors.Is(err, saveurl.ErrorSaveToStorage) {
 				case true:
-					c.String(http.StatusInternalServerError, err.Error())							
+					c.JSON(http.StatusInternalServerError, err.Error())							
 				default:
-					c.String(http.StatusBadRequest, err.Error())
+					c.JSON(http.StatusBadRequest, err.Error())
 			}	
 		}
 
