@@ -1,6 +1,6 @@
 module github.com/Vaha95/golang_pet
 
-go 1.26
+go 1.24.11
 
 require (
 	github.com/caarlos0/env/v6 v6.10.1 // indirect
