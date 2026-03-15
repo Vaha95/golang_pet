@@ -32,40 +32,19 @@ type Service struct {
 }
 
 // NewService создаёт новый экземпляр сервиса с заданной конфигурацией
-func NewService(cfg Config) *Service {
-	return &Service{}
+func NewService(db *sql.DB) *Service {
+	return &Service{db}
 }
 
 // Connect устанавливает соединение с базой данных
-func (s *Service) Connect(cfg Config) error {
-	dsn := cfg.DSN
-	if dsn == "" {
-		dsn = fmt.Sprintf(
-			"host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
-			cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.DBName, cfg.SSLMode,
-		)		
-	}
-
-	db, err := sql.Open("pgx", dsn)
+func connect(cfg Config) (*sql.DB, error) {
+	db, err := ConnectToDB(cfg)
 	if err != nil {
-		return fmt.Errorf("failed to open database: %w", err)
+		return nil, err
 	}
 
-	// Настройка пула соединений
-	db.SetMaxOpenConns(cfg.MaxOpenConns)
-	db.SetMaxIdleConns(cfg.MaxIdleConns)
-	db.SetConnMaxLifetime(cfg.ConnMaxLifetime)
-
-	// Проверяем доступность базы данных
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	if err = db.PingContext(ctx); err != nil {
-		return fmt.Errorf("failed to ping database: %w", err)
-	}
-
-	s.db = db
 	log.Println("Connected to PostgreSQL successfully")
-	return nil
+	return db, nil
 }
 
 // Close закрывает соединение с базой данных
@@ -75,6 +54,33 @@ func (s *Service) Close() error {
 	}
 
 	return nil
+}
+
+func getDSN(cfg Config) string {
+	dsn := cfg.DSN
+	if dsn == "" {
+		dsn = fmt.Sprintf(
+			"host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
+			cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.DBName, cfg.SSLMode,
+		)		
+	}
+
+	return dsn
+}
+
+func ConnectToDB(cfg Config) (*sql.DB, error) {
+	dsn := getDSN(cfg)
+	db, err := sql.Open("pgx", dsn)
+	if err != nil {
+		return nil, fmt.Errorf("failed to open database: %w", err)
+	}
+
+	// Настройка пула соединений
+	db.SetMaxOpenConns(cfg.MaxOpenConns)
+	db.SetMaxIdleConns(cfg.MaxIdleConns)
+	db.SetConnMaxLifetime(cfg.ConnMaxLifetime)
+
+	return db, nil
 }
 
 // Ping проверяет доступность базы данных
@@ -91,7 +97,7 @@ func (s *Service) GetDB() *sql.DB {
 	return s.db
 }
 
-func InitDb(mainConfig config.Config) {
+func InitDb(mainConfig config.Config) *Service {
 	cfg := Config{
 		DSN: mainConfig.DbDSN,
 		Host: "localhost",
@@ -105,9 +111,10 @@ func InitDb(mainConfig config.Config) {
 		ConnMaxLifetime: time.Hour,
 	}
 
-	pgService := NewService(cfg)
-	if err := pgService.Connect(cfg); err != nil {
+	db, err := connect(cfg)
+	if ; err != nil {
 		log.Printf("Failed to connect to database: %v", err)
 	}
-	defer pgService.Close()
+
+	return NewService(db)
 }
