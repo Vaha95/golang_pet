@@ -107,7 +107,7 @@ func InitDb(mainConfig config.Config) {
 
 	pgService := NewService(cfg)
 	if err := pgService.Connect(cfg); err != nil {
-		log.Fatalf("Failed to connect to database: %v", err)
+		log.Printf("Failed to connect to database: %v", err)
 	}
 	defer pgService.Close()
 }
