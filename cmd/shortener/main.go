@@ -15,7 +15,7 @@ import (
 func main() {
 	cfg := config.GetConfig()
 
-	dbService := db.InitDb(cfg)
+	dbService := db.InitDb(cfg) 
 	defer dbService.Close()
 
 	e := echo.New()

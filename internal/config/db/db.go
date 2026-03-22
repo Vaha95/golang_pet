@@ -1,13 +1,13 @@
 package db
 
 import (
-	"context"
 	"database/sql"
 	"fmt"
 	"log"
 	"time"
 
 	"github.com/Vaha95/golang_pet/internal/config"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	_ "github.com/jackc/pgx/v5/stdlib" // регистрация драйвера pgx
 )
 
@@ -26,16 +26,6 @@ type Config struct {
 	ConnMaxLifetime time.Duration // максимальное время жизни соединения
 }
 
-// Service представляет сервис для работы с PostgreSQL
-type Service struct {
-	db *sql.DB
-}
-
-// NewService создаёт новый экземпляр сервиса с заданной конфигурацией
-func NewService(db *sql.DB) *Service {
-	return &Service{db}
-}
-
 // Connect устанавливает соединение с базой данных
 func connect(cfg Config) (*sql.DB, error) {
 	db, err := ConnectToDB(cfg)
@@ -45,15 +35,6 @@ func connect(cfg Config) (*sql.DB, error) {
 
 	log.Println("Connected to PostgreSQL successfully")
 	return db, nil
-}
-
-// Close закрывает соединение с базой данных
-func (s *Service) Close() error {
-	if s.db != nil {
-		return s.db.Close()
-	}
-
-	return nil
 }
 
 func getDSN(cfg Config) string {
@@ -83,20 +64,6 @@ func ConnectToDB(cfg Config) (*sql.DB, error) {
 	return db, nil
 }
 
-// Ping проверяет доступность базы данных
-func (s *Service) Ping(ctx context.Context) error {
-	if s.db == nil {
-		return fmt.Errorf("database connection is not initialized")
-	}
-
-	return s.db.PingContext(ctx)
-}
-
-// GetDB возвращает объект *sql.DB для выполнения запросов
-func (s *Service) GetDB() *sql.DB {
-	return s.db
-}
-
 func InitDb(mainConfig config.Config) *Service {
 	cfg := Config{
 		DSN: mainConfig.DbDSN,
@@ -114,6 +81,11 @@ func InitDb(mainConfig config.Config) *Service {
 	db, err := connect(cfg)
 	if ; err != nil {
 		log.Printf("Failed to connect to database: %v", err)
+	}
+	
+    err = initMigrations(db)
+	if err != nil {
+		log.Printf("Failed to migrate: %v", err)
 	}
 
 	return NewService(db)
