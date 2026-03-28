@@ -13,11 +13,13 @@ import (
 )
 
 func main() {
-	dbService := db.InitDb() 
+	mainConfig := config.GetMainConfig()
+
+	dbService := db.InitDb(mainConfig) 
 	defer dbService.Close()
 
 	isDBAllowed := dbService.Ping() == nil
-	cfg := config.GetConfig(dbService, isDBAllowed)
+	cfg := config.GetConfig(dbService, isDBAllowed, mainConfig)
 
 	e := echo.New()
 

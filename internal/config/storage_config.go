@@ -16,10 +16,10 @@ type DBService interface {
 	GetDB() *sql.DB
 }
 
-func GetConfig(dbService DBService, isDBAllowed bool) StorageConfig {
+func GetConfig(dbService DBService, isDBAllowed bool, mainConfig Config) StorageConfig {
 	return StorageConfig{
 		DBService: dbService,
 		IsDBAllowed: isDBAllowed,
-		Config: GetMainConfig(),
+		Config: mainConfig,
 	}
 }
