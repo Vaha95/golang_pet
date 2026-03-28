@@ -64,7 +64,8 @@ func ConnectToDB(cfg Config) (*sql.DB, error) {
 	return db, nil
 }
 
-func InitDb(mainConfig config.Config) *Service {
+func InitDb() *Service {
+	mainConfig := config.GetMainConfig()
 	cfg := Config{
 		DSN: mainConfig.DbDSN,
 		Host: "localhost",

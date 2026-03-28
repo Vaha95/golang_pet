@@ -10,7 +10,7 @@ import (
 
 var rmu sync.RWMutex
 
-func ReadStore(cfg config.Config) (map[string]string, error) {
+func ReadFileStore(cfg config.Config) (map[string]string, error) {
 	rmu.RLock()
 	defer rmu.RUnlock()
 

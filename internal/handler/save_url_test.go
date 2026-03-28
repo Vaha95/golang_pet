@@ -24,7 +24,10 @@ func TestSaveURL(t *testing.T) {
 		URLHost: `http://localhost:8080`,
 		FilePath: ``,
 	}
-	h := GetSaveURLHandler(cfg)
+	stCfg := config.StorageConfig{
+		Config: cfg,
+	}
+	h := GetSaveURLHandler(stCfg)
 
 	c := echo.New().NewContext(request, w)
 	h(c)
@@ -53,7 +56,10 @@ func TestInvalidURL(t *testing.T) {
 		URLHost: `http://localhost:8080`,
 		FilePath: ``,
 	}
-	h := GetSaveURLHandler(cfg)
+	stCfg := config.StorageConfig{
+		Config: cfg,
+	}
+	h := GetSaveURLHandler(stCfg)
 
 	c := echo.New().NewContext(request, w)
 	h(c)

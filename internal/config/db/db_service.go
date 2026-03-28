@@ -1,7 +1,6 @@
 package db
 
 import (
-	"context"
 	"database/sql"
 	"fmt"
 )
@@ -26,12 +25,12 @@ func (s *Service) Close() error {
 }
 
 // Ping проверяет доступность базы данных
-func (s *Service) Ping(ctx context.Context) error {
+func (s *Service) Ping() error {
 	if s.db == nil {
 		return fmt.Errorf("database connection is not initialized")
 	}
 
-	return s.db.PingContext(ctx)
+	return s.db.Ping()
 }
 
 // GetDB возвращает объект *sql.DB для выполнения запросов

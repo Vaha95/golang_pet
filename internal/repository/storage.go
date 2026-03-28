@@ -1,8 +1,11 @@
 package repository
 
 import (
+	"context"
+	"database/sql"
 	"errors"
 	"fmt"
+	"log"
 
 	"github.com/Vaha95/golang_pet/internal/config"
 )
@@ -11,7 +14,7 @@ var ErrorShortURLKeyAlreadyExists = errors.New("short URL key already exists")
 var ErrorShortURLKeyNotFound = errors.New("short URL key already exists")
 
 func GetURLByKey(cfg config.Config, key string) (string, error) {
-	data, err := ReadStore(cfg)
+	data, err := ReadFileStore(cfg)
 	if err != nil {
 		return "", err
 	}
@@ -27,7 +30,7 @@ func GetURLByKey(cfg config.Config, key string) (string, error) {
 }
 
 func SetURL(cfg config.Config, key string, val string) (err error) {
-	data, err := ReadStore(cfg)
+	data, err := ReadFileStore(cfg)
 	if err != nil {
 		return err
 	}
@@ -41,7 +44,20 @@ func SetURL(cfg config.Config, key string, val string) (err error) {
 	}
 
 	data[key] = val
-	WriteStore(cfg, data)
+	WriteFileStore(cfg, data)
+
+	return nil
+}
+
+func SetURLToDB(db *sql.DB, ctx context.Context, short string, url string, extId string) (err error) {
+	sql := "INSERT INTO url_short (url,short,ext_id) VALUES ($1,$2,$3)"
+	_, err = db.ExecContext(ctx, sql, url, short, extId)
+
+	log.Println(sql)
+
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

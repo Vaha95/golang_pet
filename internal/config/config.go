@@ -12,7 +12,7 @@ type Config struct {
 	DbDSN string
 }
 
-func GetConfig() Config {
+func GetMainConfig() Config {
 	listenHostENV := os.Getenv("SERVER_ADDRESS")
 	urlHostENV := os.Getenv("BASE_URL")
 	filePathENV := os.Getenv("FILE_STORAGE_PATH")

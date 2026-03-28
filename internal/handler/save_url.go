@@ -10,7 +10,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func GetSaveURLHandler(cfg config.Config) (func(c echo.Context) error) {
+func GetSaveURLHandler(cfg config.StorageConfig) (func(c echo.Context) error) {
 	return func(c echo.Context) error {
 		req := c.Request()
 		

@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"context"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -9,12 +8,12 @@ import (
 )
 
 type DBService interface {
-    Ping(ctx context.Context) error
+    Ping() error
 }
 
 func GetPingDBHandler(service DBService) (func(c echo.Context) error) {
 	return func(c echo.Context) error {
-		err := service.Ping(c.Request().Context())
+		err := service.Ping()
 		if err != nil {
 			log.Errorf("Fail ping to DB: %v", err)
 

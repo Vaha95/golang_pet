@@ -9,7 +9,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func GetSaveURLShortenHandler(cfg config.Config) (func(c echo.Context) error) {
+func GetSaveURLShortenHandler(cfg config.StorageConfig) (func(c echo.Context) error) {
 	return func(c echo.Context) error {
 		type APIReqiest struct {
 			URI string `json:"url"`

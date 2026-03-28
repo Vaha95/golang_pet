@@ -13,17 +13,19 @@ import (
 )
 
 func main() {
-	cfg := config.GetConfig()
-
-	dbService := db.InitDb(cfg) 
+	dbService := db.InitDb() 
 	defer dbService.Close()
+
+	isDBAllowed := dbService.Ping() == nil
+	cfg := config.GetConfig(dbService, isDBAllowed)
 
 	e := echo.New()
 
-	e.GET(`/:id`, handler.GetURLHandler(cfg))
+	e.GET(`/:id`, handler.GetURLHandler(cfg.Config))
 	e.POST(`/`, handler.GetSaveURLHandler(cfg))
 	e.POST(`/api/shorten`, handler.GetSaveURLShortenHandler(cfg))
 	e.GET(`/ping`, handler.GetPingDBHandler(dbService))
+	e.POST(`/api/shorten/batch`, handler.GetSaveURLBatchHandler(cfg))
 
 	err := mv.AddMiddlewares(e)
 	if err != nil {
@@ -32,7 +34,7 @@ func main() {
 		)
 	}
 
-	err = e.Start(cfg.ListenHost)
+	err = e.Start(cfg.Config.ListenHost)
 	if err != nil {
 		log.Fatal(
 			fmt.Errorf("can`t start Web server: %w", err).Error(),
