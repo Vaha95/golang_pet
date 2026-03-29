@@ -20,19 +20,19 @@ func GetSaveURLShortenHandler(cfg config.StorageConfig) (func(c echo.Context) er
 			return c.JSON(http.StatusBadRequest, err.Error()) 
 		}
 
+		type APIResponse struct {
+			Result string `json:"result"`
+		}
+
 		path, err := saveurl.SaveURL(cfg, data.URI)
 		if err != nil {
 			if (errors.Is(err, saveurl.ErrorUrlAlreadyExists)) {
-				return c.String(http.StatusConflict, path)
+				return c.JSON(http.StatusConflict, APIResponse{Result: path})
 			} else if errors.Is(err, saveurl.ErrorSaveToStorage) {
 				return c.JSON(http.StatusInternalServerError, err.Error())
 			} else {
 				return c.JSON(http.StatusBadRequest, err.Error())
 			}
-		}
-
-		type APIResponse struct {
-			Result string `json:"result"`
 		}
 
 		return c.JSON(http.StatusCreated, APIResponse{Result: path})
