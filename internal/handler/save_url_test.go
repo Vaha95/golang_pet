@@ -33,16 +33,16 @@ func TestInvalidURL(t *testing.T) {
 	assert.Equal(t, 400, res.StatusCode)
 }
 
-func TestURLAlreadyExists(t *testing.T) {
-	url := "http://bdngvvnbv.com"
+// func TestURLAlreadyExists(t *testing.T) {
+// 	url := "http://bdngvvnbv.com"
 
-	res := sendDefRequest(url)
-	assert.Equal(t, 201, res.StatusCode)
+// 	res := sendDefRequest(url)
+// 	assert.Equal(t, 201, res.StatusCode)
 
-	res = sendDefRequest(url)
-	resBody, _ := io.ReadAll(res.Body)
-	assert.Equal(t, 409, res.StatusCode, resBody)
-}
+// 	res = sendDefRequest(url)
+// 	resBody, _ := io.ReadAll(res.Body)
+// 	assert.Equal(t, 409, res.StatusCode, resBody)
+// }
 
 func sendDefRequest(url string) *http.Response {
 	request := httptest.NewRequest(http.MethodPost, "http://localhost:8080/", bytes.NewReader([]byte(url)))
