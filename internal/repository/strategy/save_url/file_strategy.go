@@ -63,3 +63,21 @@ func (s FileStrategy) Get(key string) (string, error) {
 
 	return val, nil
 }
+
+func (s FileStrategy) GetShortByURL(url string) (string, error) {
+	data, err := repository.ReadFileStore(s.cfg)
+	if err != nil {
+		return "", err
+	}
+	if data == nil {
+		return "", fmt.Errorf("%w: %s", repository.ErrorURLNotFound, url)
+	}
+
+	for short, u := range data {
+		if u == url {
+			return short, nil
+		}
+	}
+
+	return "", fmt.Errorf("%w: %s", repository.ErrorURLNotFound, url)
+}

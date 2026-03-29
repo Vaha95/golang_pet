@@ -23,12 +23,13 @@ func GetSaveURLHandler(cfg config.StorageConfig) (func(c echo.Context) error) {
 
 		path, err := saveurl.SaveURL(cfg, inputURL)
 		if err != nil {
-			switch errors.Is(err, saveurl.ErrorSaveToStorage) {
-				case true:
-					c.JSON(http.StatusInternalServerError, err.Error())							
-				default:
-					c.JSON(http.StatusBadRequest, err.Error())
-			}	
+			 if (errors.Is(err, saveurl.ErrorUrlAlreadyExists)) {
+				return c.JSON(http.StatusConflict, err.Error())
+			} else if errors.Is(err, saveurl.ErrorSaveToStorage) {
+				return c.JSON(http.StatusInternalServerError, err.Error())
+			} else {
+				return c.JSON(http.StatusBadRequest, err.Error())
+			}
 		}
 
 		return c.String(http.StatusCreated, path)

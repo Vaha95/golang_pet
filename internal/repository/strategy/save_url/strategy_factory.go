@@ -5,13 +5,14 @@ import (
 	"github.com/Vaha95/golang_pet/internal/model/DTO/save_url"
 )
 
-type SaveURLStrategy interface {
+type URLStrategy interface {
 	Save(short string, url string, extId *string) error
 	SaveBatch(data []DTO.BatchItem, GenerateHash func() string) error
 	Get(key string) (string, error)
+	GetShortByURL(url string) (string, error)
 }
 
-func GetStrategy(cfg config.StorageConfig) SaveURLStrategy {
+func GetStrategy(cfg config.StorageConfig) URLStrategy {
 	if cfg.IsDBAllowed {
 		return DBStrategy{(cfg.DBService).GetDB(), cfg.Config}
 	}

@@ -14,15 +14,15 @@ import (
 )
 
 func SaveURL(cfg config.StorageConfig, inputURL string) (string, error) {
-		parsedURL, err := url.ParseRequestURI(inputURL)
-		if err != nil {
-			return "", fmt.Errorf("%w: %s", ErrorParseRequestURI, parsedURL)
-		}
+	parsedURL, err := url.ParseRequestURI(inputURL)
+	if err != nil {
+		return "", fmt.Errorf("%w: %s", ErrorParseRequestURI, parsedURL)
+	}
 
-		id, err := setToStorage(cfg, parsedURL.String())
-		if err != nil {
-			return "", fmt.Errorf("%w: %s, %w", ErrorSaveToStorage, parsedURL, err)
-		}
+	id, err := setToStorage(cfg, parsedURL.String())
+	if err != nil {
+		return "", fmt.Errorf("%w: %s, %w", ErrorSaveToStorage, parsedURL, err)
+	}
 
 	return url.JoinPath(cfg.Config.URLHost, id)
 
@@ -38,6 +38,15 @@ func setToStorage(cfg config.StorageConfig, parsedURL string) (string, error) {
 			}
 			
 			return "", fmt.Errorf("failed to save the short URL: %w", err)
+		}
+
+		dbId, err := strategy.GetShortByURL(parsedURL)
+		if err != nil {
+			return "", fmt.Errorf("failed to find short by URL: %w", err)
+		}
+
+		if dbId != id {
+			return "", fmt.Errorf("failed to find short by URL: %w", ErrorUrlAlreadyExists)
 		}
 
 		return id, nil
