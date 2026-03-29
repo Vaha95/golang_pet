@@ -15,7 +15,7 @@ import (
 )
 
 func TestGetUrl(t *testing.T) {
-	url := "http://vfdfbdfbd.com"
+	url := "http://njknonnjkn.com"
 
 	cfg := config.Config{
 		ListenHost: `localhost:8080`,
