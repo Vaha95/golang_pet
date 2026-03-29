@@ -10,31 +10,52 @@ import (
 
 	"github.com/Vaha95/golang_pet/internal/config"
 	"github.com/Vaha95/golang_pet/internal/repository"
+	strategy "github.com/Vaha95/golang_pet/internal/repository/strategy/save_url"
 )
 
-func SaveURL(cfg config.Config, inputURL string) (string, error) {
-		parsedURL, err := url.ParseRequestURI(inputURL)
-		if err != nil {
-			return "", fmt.Errorf("%w: %s", ErrorParseRequestURI, parsedURL)
-		}
+func SaveURL(cfg config.StorageConfig, inputURL string) (string, error) {
+	parsedURL, err := url.ParseRequestURI(inputURL)
+	if err != nil {
+		return "", fmt.Errorf("%w: %s", ErrorParseRequestURI, parsedURL)
+	}
 
-		id, err := setToStorage(cfg, parsedURL.String())
-		if err != nil {
-			return "", fmt.Errorf("%w: %s", ErrorSaveToStorage, parsedURL)
-		}
+	id, err := setToStorage(cfg, parsedURL.String())
+	if err != nil {
+		if (errors.Is(err, ErrorUrlAlreadyExists)) {
+			id, joinErr := url.JoinPath(cfg.Config.URLHost, id)
+			if joinErr != nil {
+				return "", joinErr
+			}
 
-	return url.JoinPath(cfg.URLHost, id)
+			return id, err
+		} else {
+			return "", fmt.Errorf("%w: %s, %w", ErrorSaveToStorage, parsedURL, err)
+		}
+	}
+
+	return url.JoinPath(cfg.Config.URLHost, id)
 
 }
 
-func setToStorage(cfg config.Config, parsedURL string) (string, error) {
+func setToStorage(cfg config.StorageConfig, parsedURL string) (string, error) {
 	for i := 0; i < 10; i++ {
 		id := GenerateHash()
-		if err := repository.SetURL(cfg, id, parsedURL); err != nil {
+		strategy := strategy.GetStrategy(cfg)
+		if err := strategy.Save(id, parsedURL, nil); err != nil {
 			if errors.Is(err, repository.ErrorShortURLKeyAlreadyExists) {
 				continue
 			}
+			
 			return "", fmt.Errorf("failed to save the short URL: %w", err)
+		}
+
+		dbId, err := strategy.GetShortByURL(parsedURL)
+		if err != nil {
+			return "", fmt.Errorf("failed to find short by URL: %w", err)
+		}
+
+		if dbId != id {
+			return dbId, fmt.Errorf("failed to find short by URL: %w", ErrorUrlAlreadyExists)
 		}
 
 		return id, nil

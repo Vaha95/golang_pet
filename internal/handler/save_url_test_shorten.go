@@ -15,22 +15,7 @@ import (
 )
 
 func TestSaveURLShorten(t *testing.T) {
-	request := httptest.NewRequest(http.MethodPost, "http://localhost:8080/", bytes.NewReader([]byte("http://vfdfbdfbd.com")))
-	request.Header.Add("Content-type", "text/plain")
-
-	w := httptest.NewRecorder()
-	cfg := config.Config{
-		ListenHost: `localhost:8080`,
-		URLHost: `http://localhost:8080`,
-		FilePath: ``,
-	}
-	h := GetSaveURLHandler(cfg)
-
-	c := echo.New().NewContext(request, w)
-	h(c)
-
-	res := w.Result()
-	defer res.Body.Close()
+	res, w := sendDefShortenRequest("http://nhgngmvnv.com")
 
 	assert.Equal(t, 201, res.StatusCode)
 	assert.Equal(t, echo.MIMEApplicationJSON, w.Header().Get(echo.HeaderContentType))
@@ -47,7 +32,13 @@ func TestSaveURLShorten(t *testing.T) {
 }
 
 func TestInvalidURLShorten(t *testing.T) {
-	request := httptest.NewRequest(http.MethodPost, "http://localhost:8080/", bytes.NewReader([]byte("this is not URL")))
+	res, _ := sendDefShortenRequest("this is not URL")
+
+	assert.Equal(t, 400, res.StatusCode)
+}
+
+func sendDefShortenRequest(url string) (*http.Response, *httptest.ResponseRecorder) {
+	request := httptest.NewRequest(http.MethodPost, "http://localhost:8080/", bytes.NewReader([]byte(url)))
 	request.Header.Add("Content-type", "text/plain")
 
 	w := httptest.NewRecorder()
@@ -56,7 +47,10 @@ func TestInvalidURLShorten(t *testing.T) {
 		URLHost: `http://localhost:8080`,
 		FilePath: ``,
 	}
-	h := GetSaveURLHandler(cfg)
+	stCfg := config.StorageConfig{
+		Config: cfg,
+	}
+	h := GetSaveURLShortenHandler(stCfg)
 
 	c := echo.New().NewContext(request, w)
 	h(c)
@@ -64,5 +58,5 @@ func TestInvalidURLShorten(t *testing.T) {
 	res := w.Result()
 	defer res.Body.Close()
 
-	assert.Equal(t, 400, res.StatusCode)
+	return res, w
 }

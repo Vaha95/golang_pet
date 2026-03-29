@@ -9,7 +9,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func GetSaveURLShortenHandler(cfg config.Config) (func(c echo.Context) error) {
+func GetSaveURLShortenHandler(cfg config.StorageConfig) (func(c echo.Context) error) {
 	return func(c echo.Context) error {
 		type APIReqiest struct {
 			URI string `json:"url"`
@@ -17,21 +17,22 @@ func GetSaveURLShortenHandler(cfg config.Config) (func(c echo.Context) error) {
 		var data APIReqiest
 
 		if err := c.Bind(&data); err != nil {
-			return c.String(http.StatusBadRequest, err.Error()) 
-		}
-
-		path, err := saveurl.SaveURL(cfg, data.URI)
-		if err != nil {
-			switch errors.Is(err, saveurl.ErrorSaveToStorage) {
-				case true:
-					c.String(http.StatusInternalServerError, err.Error())							
-				default:
-					c.String(http.StatusBadRequest, err.Error())
-			}	
+			return c.JSON(http.StatusBadRequest, err.Error()) 
 		}
 
 		type APIResponse struct {
 			Result string `json:"result"`
+		}
+
+		path, err := saveurl.SaveURL(cfg, data.URI)
+		if err != nil {
+			if (errors.Is(err, saveurl.ErrorUrlAlreadyExists)) {
+				return c.JSON(http.StatusConflict, APIResponse{Result: path})
+			} else if errors.Is(err, saveurl.ErrorSaveToStorage) {
+				return c.JSON(http.StatusInternalServerError, err.Error())
+			} else {
+				return c.JSON(http.StatusBadRequest, err.Error())
+			}
 		}
 
 		return c.JSON(http.StatusCreated, APIResponse{Result: path})
