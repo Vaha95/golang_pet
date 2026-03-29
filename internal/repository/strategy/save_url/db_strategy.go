@@ -3,12 +3,15 @@ package repository
 import (
 	"database/sql"
 	"fmt"
+	"net/url"
 
+	"github.com/Vaha95/golang_pet/internal/config"
 	DTO "github.com/Vaha95/golang_pet/internal/model/DTO/save_url"
 )
 
 type DBStrategy struct {
 	db *sql.DB
+	cfg config.Config
 }
 
 func (s DBStrategy) Save(short string, url string, extId *string) error {
@@ -42,14 +45,20 @@ func (s DBStrategy) SaveBatch(data []DTO.BatchItem, GenerateHash func() string) 
 			return fmt.Errorf("failed to save the short URL to DB: %w", err)
 		}
 
-		item.Short = id
+		shortURL, err := url.JoinPath(s.cfg.URLHost, id)
+		if err != nil {
+			t.Rollback()
+
+			return fmt.Errorf("failed to create URL from short: %w", err)
+		}
+		item.Short = shortURL
 	}
 
 	return nil
 }
 
 func (s DBStrategy) Get(key string) (string, error) {
-	sql := "SELECT url FROM url_short where short = $1 LIMIT 1"
+	sql := "SELECT url FROM url_short where short=$1 LIMIT 1"
 
 	row := s.db.QueryRow(sql, key)
 

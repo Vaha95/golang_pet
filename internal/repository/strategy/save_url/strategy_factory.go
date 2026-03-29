@@ -13,7 +13,7 @@ type SaveURLStrategy interface {
 
 func GetStrategy(cfg config.StorageConfig) SaveURLStrategy {
 	if cfg.IsDBAllowed {
-		return DBStrategy{(cfg.DBService).GetDB()}
+		return DBStrategy{(cfg.DBService).GetDB(), cfg.Config}
 	}
 
 	return FileStrategy{cfg.Config}
