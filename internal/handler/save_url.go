@@ -24,7 +24,7 @@ func GetSaveURLHandler(cfg config.StorageConfig) (func(c echo.Context) error) {
 		path, err := saveurl.SaveURL(cfg, inputURL)
 		if err != nil {
 			 if (errors.Is(err, saveurl.ErrorUrlAlreadyExists)) {
-				return c.JSON(http.StatusConflict, err.Error())
+				return c.JSON(http.StatusConflict, path)
 			} else if errors.Is(err, saveurl.ErrorSaveToStorage) {
 				return c.JSON(http.StatusInternalServerError, err.Error())
 			} else {

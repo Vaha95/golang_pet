@@ -37,17 +37,6 @@ func TestInvalidURLShorten(t *testing.T) {
 	assert.Equal(t, 400, res.StatusCode)
 }
 
-// func TestURLAlreadyExistsShorten(t *testing.T) {
-// 	url := "http://cdsvfbcb.com"
-
-// 	res, _ := sendDefShortenRequest(url)
-// 	assert.Equal(t, 201, res.StatusCode)
-
-// 	res, _ = sendDefShortenRequest(url)
-// 	resBody, _ := io.ReadAll(res.Body)
-// 	assert.Equal(t, 409, res.StatusCode, resBody)
-// }
-
 func sendDefShortenRequest(url string) (*http.Response, *httptest.ResponseRecorder) {
 	request := httptest.NewRequest(http.MethodPost, "http://localhost:8080/", bytes.NewReader([]byte(url)))
 	request.Header.Add("Content-type", "text/plain")

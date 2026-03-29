@@ -21,7 +21,16 @@ func SaveURL(cfg config.StorageConfig, inputURL string) (string, error) {
 
 	id, err := setToStorage(cfg, parsedURL.String())
 	if err != nil {
-		return "", fmt.Errorf("%w: %s, %w", ErrorSaveToStorage, parsedURL, err)
+		if (errors.Is(err, ErrorUrlAlreadyExists)) {
+			id, joinErr := url.JoinPath(cfg.Config.URLHost, id)
+			if joinErr != nil {
+				return "", joinErr
+			}
+
+			return id, err
+		} else {
+			return "", fmt.Errorf("%w: %s, %w", ErrorSaveToStorage, parsedURL, err)
+		}
 	}
 
 	return url.JoinPath(cfg.Config.URLHost, id)
@@ -46,7 +55,7 @@ func setToStorage(cfg config.StorageConfig, parsedURL string) (string, error) {
 		}
 
 		if dbId != id {
-			return "", fmt.Errorf("failed to find short by URL: %w", ErrorUrlAlreadyExists)
+			return dbId, fmt.Errorf("failed to find short by URL: %w", ErrorUrlAlreadyExists)
 		}
 
 		return id, nil
