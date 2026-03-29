@@ -32,6 +32,20 @@ func GetSaveURLBatchHandler(cfg config.StorageConfig) (func(c echo.Context) erro
 			return c.JSON(http.StatusInternalServerError, err.Error()) 
 		}
 
-		return c.JSON(http.StatusCreated, data)
+		type APIResponse struct {
+			ExtId string `json:"correlation_id"`
+			Short string `json:"short_url"`
+		}
+
+		var resp []APIResponse
+
+		for _, v := range data {
+			resp = append(resp, APIResponse{
+				ExtId: v.ExtId,
+				Short: v.Short,
+			})
+		}
+
+		return c.JSON(http.StatusCreated, resp)
 	}
 }

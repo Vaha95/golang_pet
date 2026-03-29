@@ -7,7 +7,7 @@ import (
 
 type SaveURLStrategy interface {
 	Save(short string, url string, extId *string) error
-	SaveBatch(data []DTO.BatchItem, GenerateHash func() string) error
+	SaveBatch(data *[]DTO.BatchItem, GenerateHash func() string) error
 }
 
 func GetStrategy(cfg config.StorageConfig) SaveURLStrategy {

@@ -22,20 +22,24 @@ func (s DBStrategy) Save(short string, url string, extId *string) error {
 	return nil
 }
 
-func (s DBStrategy) SaveBatch(data []DTO.BatchItem, GenerateHash func() string) error {
+func (s DBStrategy) SaveBatch(data *[]DTO.BatchItem, GenerateHash func() string) error {
 	t, err := s.db.Begin()
 	if err != nil {
 		return fmt.Errorf("failed to begin transaction fo save to DB: %w", err)
 	}
 	defer t.Commit()
 
-	for i := 0; i < len(data); i++ {
-		err := s.Save(GenerateHash(), data[i].URL, &data[i].ExtId)
+	for i := 0; i < len(*data); i++ {
+		id := GenerateHash()
+		extId := (*data)[i].ExtId
+		err := s.Save(id, (*data)[i].URL, &extId)
 		if err != nil {
 			t.Rollback()
 
 			return fmt.Errorf("failed to save the short URL to DB: %w", err)
 		}
+
+		(*data)[i].Short = id
 	}
 
 	return nil

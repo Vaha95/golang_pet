@@ -27,7 +27,7 @@ func TestSaveURLShorten(t *testing.T) {
 	stCfg := config.StorageConfig{
 		Config: cfg,
 	}
-	h := GetSaveURLHandler(stCfg)
+	h := GetSaveURLShortenHandler(stCfg)
 
 	c := echo.New().NewContext(request, w)
 	h(c)
@@ -62,7 +62,7 @@ func TestInvalidURLShorten(t *testing.T) {
 	stCfg := config.StorageConfig{
 		Config: cfg,
 	}
-	h := GetSaveURLHandler(stCfg)
+	h := GetSaveURLShortenHandler(stCfg)
 
 	c := echo.New().NewContext(request, w)
 	h(c)
