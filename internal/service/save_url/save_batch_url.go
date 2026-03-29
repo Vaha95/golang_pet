@@ -10,7 +10,7 @@ import (
 
 func SaveBatchURL(cfg config.StorageConfig, data []DTO.BatchItem) error {
 	strategy := strategy.GetStrategy(cfg)
-	err := strategy.SaveBatch(&data, GenerateHash)
+	err := strategy.SaveBatch(data, GenerateHash)
 	if err != nil {
 		return fmt.Errorf("failed to save the short URL to DB: %w", err)
 	}

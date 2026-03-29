@@ -23,7 +23,7 @@ func main() {
 
 	e := echo.New()
 
-	e.GET(`/:id`, handler.GetURLHandler(cfg.Config))
+	e.GET(`/:id`, handler.GetURLHandler(cfg))
 	e.POST(`/`, handler.GetSaveURLHandler(cfg))
 	e.POST(`/api/shorten`, handler.GetSaveURLShortenHandler(cfg))
 	e.GET(`/ping`, handler.GetPingDBHandler(dbService))

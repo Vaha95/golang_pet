@@ -22,25 +22,42 @@ func (s DBStrategy) Save(short string, url string, extId *string) error {
 	return nil
 }
 
-func (s DBStrategy) SaveBatch(data *[]DTO.BatchItem, GenerateHash func() string) error {
+func (s DBStrategy) SaveBatch(data []DTO.BatchItem, GenerateHash func() string) error {
 	t, err := s.db.Begin()
 	if err != nil {
 		return fmt.Errorf("failed to begin transaction fo save to DB: %w", err)
 	}
 	defer t.Commit()
 
-	for i := 0; i < len(*data); i++ {
+	for i := 0; i < len(data); i++ {
+		item := &data[i]
+
 		id := GenerateHash()
-		extId := (*data)[i].ExtId
-		err := s.Save(id, (*data)[i].URL, &extId)
+		extId := item.ExtId
+
+		err := s.Save(id, item.URL, &extId)
 		if err != nil {
 			t.Rollback()
 
 			return fmt.Errorf("failed to save the short URL to DB: %w", err)
 		}
 
-		(*data)[i].Short = id
+		item.Short = id
 	}
 
 	return nil
+}
+
+func (s DBStrategy) Get(key string) (string, error) {
+	sql := "SELECT url FROM url_short where short = $1 LIMIT 1"
+
+	row := s.db.QueryRow(sql, key)
+
+	var short string
+	err := row.Scan(&short)
+	if err != nil || short == "" {
+		return "", fmt.Errorf("failed to parse URL from DBRow: %w", err)
+	}
+
+	return short, nil
 }
