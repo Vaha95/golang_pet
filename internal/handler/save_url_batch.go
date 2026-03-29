@@ -32,6 +32,6 @@ func GetSaveURLBatchHandler(cfg config.StorageConfig) (func(c echo.Context) erro
 			return c.JSON(http.StatusInternalServerError, err.Error()) 
 		}
 
-		return c.JSON(http.StatusCreated, nil)
+		return c.JSON(http.StatusCreated, data)
 	}
 }
