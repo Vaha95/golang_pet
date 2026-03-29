@@ -22,13 +22,16 @@ func TestGetUrl(t *testing.T) {
 		URLHost: `http://localhost:8080`,
 		FilePath: ``,
 	}
+	stCfg := config.StorageConfig{
+		Config: cfg,
+	}
 
 	id := saveurl.GenerateHash()
 	repository.SetURL(cfg, id, url)
 
 	request := httptest.NewRequest(http.MethodGet, fmt.Sprintf("http://localhost:8080/%s", id), nil)
 	w := httptest.NewRecorder()
-	h := GetURLHandler(cfg)
+	h := GetURLHandler(stCfg)
 
 	c := echo.New().NewContext(request, w)
 	c.SetParamNames("id")
