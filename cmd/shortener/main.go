@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 
@@ -16,16 +17,19 @@ import (
 func main() {
 	mainConfig := config.GetMainConfig()
 
-	dbService, err := db.InitDb(mainConfig) 
-	defer dbService.Close()
-
-	if err != nil {
+	dbService, err := db.InitDb(mainConfig)
+	if err != nil && !errors.Is(err, db.ErrorDBDsnEmpty) {
 		log.Fatal(
 			fmt.Errorf("can`t init db: %w", err).Error(),
 		)
 	}
+	isDBAllowed := false
+	if dbService != nil {
+		defer dbService.Close()
 
-	isDBAllowed := dbService.Ping() == nil
+		isDBAllowed = dbService.Ping() == nil
+	}
+
 	cfg := config.GetConfig(dbService, isDBAllowed, mainConfig)
 
 	l, err := getLogger()

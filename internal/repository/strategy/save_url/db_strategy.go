@@ -41,7 +41,7 @@ func (s DBStrategy) SaveBatch(data []dto.BatchItem, generateHash func() string) 
     _, err := s.db.Exec(stmt, valueArgs...)
 
     for k, batch := range data {
-		short, err := s.getShortByURL(batch.URL)
+		short, err := s.GetShortByURL(batch.URL)
 		if err != nil {
 			return fmt.Errorf("failed to find short: %w", err)
 		}
@@ -66,10 +66,10 @@ func (s DBStrategy) Get(short string) (string, error) {
 	return url, nil
 }
 
-func (s DBStrategy) GetShortByURL(url string) (string, error) {
+func (s DBStrategy) GetShortByURL(u string) (string, error) {
 	sql := "SELECT short FROM url_short where url=$1 LIMIT 1"
 
-	row := s.db.QueryRow(sql, url)
+	row := s.db.QueryRow(sql, u)
 
 	var short string
 	err := row.Scan(&short)
@@ -77,19 +77,10 @@ func (s DBStrategy) GetShortByURL(url string) (string, error) {
 		return "", fmt.Errorf("failed to parse short from DBRow: %w", err)
 	}
 
-	return short, nil
-}
-
-func (s DBStrategy) getShortByURL(u string) (string, error) {
-	id, err := s.GetShortByURL(u)
-	if err != nil {
-		return "", fmt.Errorf("failed to find short by URL: %w", err)
-	}
-
-	shortURL, err := url.JoinPath(s.cfg.URLHost, id)
+	short, err = url.JoinPath(s.cfg.URLHost, short)
 	if err != nil {
 		return "", fmt.Errorf("failed to create URL from short: %w", err)
 	}
 
-	return shortURL, nil
+	return short, nil
 }

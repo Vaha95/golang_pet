@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	"time"
@@ -10,6 +11,7 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	_ "github.com/jackc/pgx/v5/stdlib" // регистрация драйвера pgx
 )
+var ErrorDBDsnEmpty = errors.New("DB dsn is empty")
 
 // Config содержит параметры подключения к PostgreSQL
 type Config struct {
@@ -31,17 +33,12 @@ func connect(cfg Config) (*sql.DB, error) {
 	return db, nil
 }
 
-func getDSN(cfg Config) string {
+func сonnectToDB(cfg Config) (*sql.DB, error) {
 	dsn := cfg.DSN
 	if dsn == "" {
-		dsn = "host=localhost port=5432 user=myuser password=mypass dbname=mydatabase sslmode=disable"
+		return nil, fmt.Errorf("DB dsn is empty: %w", ErrorDBDsnEmpty)		
 	}
 
-	return dsn
-}
-
-func сonnectToDB(cfg Config) (*sql.DB, error) {
-	dsn := getDSN(cfg)
 	db, err := sql.Open("pgx", dsn)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open database: %w", err)
@@ -65,7 +62,7 @@ func InitDb(mainConfig config.Config) (*Service, error) {
 
 	db, err := connect(cfg)
 	if ; err != nil {
-		return nil, fmt.Errorf("Failed to connect to database: %v", err)
+		return nil, fmt.Errorf("Failed to connect to database: %w", err)
 	}
 	
     err = initMigrations(db)
