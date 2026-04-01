@@ -45,6 +45,10 @@ func (s DBStrategy) SaveBatch(data []dto.BatchItem, generateHash func() string) 
 		if err != nil {
 			return fmt.Errorf("failed to find short: %w", err)
 		}
+		short, err = url.JoinPath(s.cfg.URLHost, short)
+		if err != nil {
+			return fmt.Errorf("failed to create URL from short: %w", err)
+		}
 
 		data[k].Short = short	
 	}
@@ -75,11 +79,6 @@ func (s DBStrategy) GetShortByURL(u string) (string, error) {
 	err := row.Scan(&short)
 	if err != nil || short == "" {
 		return "", fmt.Errorf("failed to parse short from DBRow: %w", err)
-	}
-
-	short, err = url.JoinPath(s.cfg.URLHost, short)
-	if err != nil {
-		return "", fmt.Errorf("failed to create URL from short: %w", err)
 	}
 
 	return short, nil
