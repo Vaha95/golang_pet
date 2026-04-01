@@ -31,7 +31,8 @@ func TestGetUrl(t *testing.T) {
 
 	request := httptest.NewRequest(http.MethodGet, fmt.Sprintf("http://localhost:8080/%s", id), nil)
 	w := httptest.NewRecorder()
-	h := GetURLHandler(stCfg)
+	l, _ := getLogger()
+	h := GetURLHandler(stCfg, l)
 
 	c := echo.New().NewContext(request, w)
 	c.SetParamNames("id")

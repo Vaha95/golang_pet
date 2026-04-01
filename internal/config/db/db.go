@@ -14,12 +14,6 @@ import (
 // Config содержит параметры подключения к PostgreSQL
 type Config struct {
 	DSN string
-	Host string
-	Port int
-	User string
-	Password string
-	DBName string
-	SSLMode string // например, "disable" или "require"
 
 	MaxOpenConns int // максимальное количество открытых соединений
 	MaxIdleConns int // максимальное количество простаивающих соединений
@@ -28,7 +22,7 @@ type Config struct {
 
 // Connect устанавливает соединение с базой данных
 func connect(cfg Config) (*sql.DB, error) {
-	db, err := ConnectToDB(cfg)
+	db, err := сonnectToDB(cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -40,16 +34,13 @@ func connect(cfg Config) (*sql.DB, error) {
 func getDSN(cfg Config) string {
 	dsn := cfg.DSN
 	if dsn == "" {
-		dsn = fmt.Sprintf(
-			"host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
-			cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.DBName, cfg.SSLMode,
-		)		
+		dsn = "host=localhost port=5432 user=myuser password=mypass dbname=mydatabase sslmode=disable"
 	}
 
 	return dsn
 }
 
-func ConnectToDB(cfg Config) (*sql.DB, error) {
+func сonnectToDB(cfg Config) (*sql.DB, error) {
 	dsn := getDSN(cfg)
 	db, err := sql.Open("pgx", dsn)
 	if err != nil {
@@ -64,15 +55,9 @@ func ConnectToDB(cfg Config) (*sql.DB, error) {
 	return db, nil
 }
 
-func InitDb(mainConfig config.Config) *Service {
+func InitDb(mainConfig config.Config) (*Service, error) {
 	cfg := Config{
 		DSN: mainConfig.DbDSN,
-		Host: "localhost",
-		Port: 5432,
-		User: "myuser",
-		Password: "mypass",
-		DBName: "mydatabase",
-		SSLMode: "disable",
 		MaxOpenConns: 10,
 		MaxIdleConns: 5,
 		ConnMaxLifetime: time.Hour,
@@ -80,13 +65,13 @@ func InitDb(mainConfig config.Config) *Service {
 
 	db, err := connect(cfg)
 	if ; err != nil {
-		log.Printf("Failed to connect to database: %v", err)
+		return nil, fmt.Errorf("Failed to connect to database: %v", err)
 	}
 	
     err = initMigrations(db)
 	if err != nil {
-		log.Printf("Failed to migrate: %v", err)
+		return nil, fmt.Errorf("Failed to migrate: %v", err)
 	}
 
-	return NewService(db)
+	return NewService(db), nil
 }

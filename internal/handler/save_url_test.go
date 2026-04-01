@@ -46,7 +46,8 @@ func sendDefRequest(url string) *http.Response {
 	stCfg := config.StorageConfig{
 		Config: cfg,
 	}
-	h := GetSaveURLHandler(stCfg)
+	l, _ := getLogger()
+	h := GetSaveURLHandler(stCfg, l)
 
 	c := echo.New().NewContext(request, w)
 	h(c)

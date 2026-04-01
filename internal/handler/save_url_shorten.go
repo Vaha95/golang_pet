@@ -7,9 +7,10 @@ import (
 	"github.com/Vaha95/golang_pet/internal/config"
 	"github.com/Vaha95/golang_pet/internal/service/save_url"
 	"github.com/labstack/echo/v4"
+	"go.uber.org/zap"
 )
 
-func GetSaveURLShortenHandler(cfg config.StorageConfig) (func(c echo.Context) error) {
+func GetSaveURLShortenHandler(cfg config.StorageConfig, l *zap.SugaredLogger) (func(c echo.Context) error) {
 	return func(c echo.Context) error {
 		type APIReqiest struct {
 			URI string `json:"url"`
@@ -29,7 +30,9 @@ func GetSaveURLShortenHandler(cfg config.StorageConfig) (func(c echo.Context) er
 			if (errors.Is(err, saveurl.ErrorUrlAlreadyExists)) {
 				return c.JSON(http.StatusConflict, APIResponse{Result: path})
 			} else if errors.Is(err, saveurl.ErrorSaveToStorage) {
-				return c.JSON(http.StatusInternalServerError, err.Error())
+				l.Errorf("Shorten url save error: %w", err)
+
+				return c.NoContent(http.StatusInternalServerError)
 			} else {
 				return c.JSON(http.StatusBadRequest, err.Error())
 			}

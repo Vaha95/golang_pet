@@ -4,9 +4,10 @@ import (
 	"database/sql"
 	"fmt"
 	"net/url"
+	"strings"
 
 	"github.com/Vaha95/golang_pet/internal/config"
-	DTO "github.com/Vaha95/golang_pet/internal/model/DTO/save_url"
+	dto "github.com/Vaha95/golang_pet/internal/model/DTO/save_url"
 )
 
 type DBStrategy struct {
@@ -25,43 +26,30 @@ func (s DBStrategy) Save(short string, url string, extId *string) error {
 	return nil
 }
 
-func (s DBStrategy) SaveBatch(data []DTO.BatchItem, GenerateHash func() string) error {
-	t, err := s.db.Begin()
-	if err != nil {
-		return fmt.Errorf("failed to begin transaction fo save to DB: %w", err)
-	}
-	defer t.Commit()
+func (s DBStrategy) SaveBatch(data []dto.BatchItem, generateHash func() string) error {    
+	valueStrings := make([]string, 0, len(data))
+    valueArgs := make([]interface{}, 0, len(data) * 3)
+    for k, batch := range data {
+		id := generateHash()
+		i := (k+1)*3
+        valueStrings = append(valueStrings, fmt.Sprintf("($%d, $%d, $%d)", i-2, i-1, i))
+        valueArgs = append(valueArgs, id, batch.URL, batch.ExtId)
+    }
 
-	for i := 0; i < len(data); i++ {
-		item := &data[i]
+    stmt := fmt.Sprintf("INSERT INTO url_short (short,url,ext_id) VALUES %s ON CONFLICT (url) DO NOTHING", 
+                        strings.Join(valueStrings, ","))
+    _, err := s.db.Exec(stmt, valueArgs...)
 
-		id := GenerateHash()
-		extId := item.ExtId
-
-		err := s.Save(id, item.URL, &extId)
+    for k, batch := range data {
+		short, err := s.getShortByURL(batch.URL)
 		if err != nil {
-			t.Rollback()
-
-			return fmt.Errorf("failed to save the short URL to DB: %w", err)
+			return fmt.Errorf("failed to find short: %w", err)
 		}
 
-		id, err = s.GetShortByURL(item.URL)
-		if err != nil {
-			t.Rollback()
-
-			return fmt.Errorf("failed to find short by URL: %w", err)
-		}
-
-		shortURL, err := url.JoinPath(s.cfg.URLHost, id)
-		if err != nil {
-			t.Rollback()
-
-			return fmt.Errorf("failed to create URL from short: %w", err)
-		}
-		item.Short = shortURL
+		data[k].Short = short	
 	}
 
-	return nil
+    return err
 }
 
 func (s DBStrategy) Get(short string) (string, error) {
@@ -90,4 +78,18 @@ func (s DBStrategy) GetShortByURL(url string) (string, error) {
 	}
 
 	return short, nil
+}
+
+func (s DBStrategy) getShortByURL(u string) (string, error) {
+	id, err := s.GetShortByURL(u)
+	if err != nil {
+		return "", fmt.Errorf("failed to find short by URL: %w", err)
+	}
+
+	shortURL, err := url.JoinPath(s.cfg.URLHost, id)
+	if err != nil {
+		return "", fmt.Errorf("failed to create URL from short: %w", err)
+	}
+
+	return shortURL, nil
 }

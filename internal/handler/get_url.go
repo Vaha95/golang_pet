@@ -7,10 +7,11 @@ import (
 	"github.com/Vaha95/golang_pet/internal/config"
 	"github.com/Vaha95/golang_pet/internal/repository"
 	"github.com/labstack/echo/v4"
+	"go.uber.org/zap"
 	strategy "github.com/Vaha95/golang_pet/internal/repository/strategy/save_url"
 )
 
-func GetURLHandler(cfg config.StorageConfig) (func(c echo.Context) error) {
+func GetURLHandler(cfg config.StorageConfig, l *zap.SugaredLogger) (func(c echo.Context) error) {
 	return func (c echo.Context) error {
 		id := c.Param("id")
 
@@ -20,7 +21,9 @@ func GetURLHandler(cfg config.StorageConfig) (func(c echo.Context) error) {
 			return c.JSON(http.StatusNotFound, "URL is not found")			
 		}
 		if val == "" {
-			return c.JSON(http.StatusInternalServerError, err.Error())
+			l.Errorf("Url is empty")
+
+			return c.NoContent(http.StatusInternalServerError)
 		}
 
 		return c.Redirect(http.StatusTemporaryRedirect, val)
