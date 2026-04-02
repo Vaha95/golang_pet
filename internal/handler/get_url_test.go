@@ -15,12 +15,15 @@ import (
 )
 
 func TestGetUrl(t *testing.T) {
-	url := "http://vfdfbdfbd.com"
+	url := "http://njknonnjkn.com"
 
 	cfg := config.Config{
 		ListenHost: `localhost:8080`,
 		URLHost: `http://localhost:8080`,
 		FilePath: ``,
+	}
+	stCfg := config.StorageConfig{
+		Config: cfg,
 	}
 
 	id := saveurl.GenerateHash()
@@ -28,7 +31,8 @@ func TestGetUrl(t *testing.T) {
 
 	request := httptest.NewRequest(http.MethodGet, fmt.Sprintf("http://localhost:8080/%s", id), nil)
 	w := httptest.NewRecorder()
-	h := GetURLHandler(cfg)
+	l, _ := getLogger()
+	h := GetURLHandler(stCfg, l)
 
 	c := echo.New().NewContext(request, w)
 	c.SetParamNames("id")

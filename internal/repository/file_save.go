@@ -10,7 +10,7 @@ import (
 
 var mu sync.RWMutex
 
-func WriteStore(cfg config.Config, store map[string]string) error {
+func WriteFileStore(cfg config.Config, store map[string]string) error {
 	mu.Lock()
 	defer mu.Unlock()
 

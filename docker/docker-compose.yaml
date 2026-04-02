@@ -1,0 +1,37 @@
+services:
+  postgres:
+    image: postgres:18.3-alpine
+    container_name: postgres_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: mydatabase
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U myuser -d mydatabase"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com # Логин для входа в pgAdmin
+      PGADMIN_DEFAULT_PASSWORD: admin # Пароль
+    ports:
+      - "5050:80" # Веб-интерфейс pgAdmin на порту 5050
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin # Том для сохранения настроек pgAdmin
+    depends_on:
+      postgres:
+        condition: service_healthy # Ждём, пока PostgreSQL будет готов
+
+volumes:
+  postgres_data:
+  pgadmin_data:
