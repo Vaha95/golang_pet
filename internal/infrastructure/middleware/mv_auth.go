@@ -27,26 +27,28 @@ type Claims struct {
 func addAuthMiddleware(cfg config.StorageConfig, e *echo.Echo, l *zap.SugaredLogger) {
 	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c *echo.Context) error {
-			token, err := readCookie(c)
+			if cfg.IsDBAllowed {
+				token, err := readCookie(c)
 
-			userId := getUserID(token)
-			if userId < 0 || err != nil {
-				userId, err = repository.CreateUser(cfg.DBService.GetDB())
-				if err != nil {
-					l.Errorf("buildJWTString err: %w", err)
+				userId := getUserID(token)
+				if userId < 0 || err != nil {
+					userId, err = repository.CreateUser(cfg.DBService.GetDB())
+					if err != nil {
+						l.Errorf("buildJWTString err: %w", err)
 
-					return err
+						return err
+					}
+
+					token, err := buildJWTString()
+					if err != nil {
+						l.Errorf("buildJWTString err: %w", err)
+
+						return err
+					}
+					writeCookie(c, token)
 				}
-
-				token, err := buildJWTString()
-				if err != nil {
-					l.Errorf("buildJWTString err: %w", err)
-
-					return err
-				}
-				writeCookie(c, token)
+				cfg.SetUserId(userId)				
 			}
-			cfg.SetUserId(userId)
 
 			next(c)
 
