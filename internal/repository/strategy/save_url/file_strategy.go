@@ -82,7 +82,7 @@ func (s FileStrategy) GetShortByURL(url string) (string, error) {
 	return "", fmt.Errorf("%w: %s", repository.ErrorURLNotFound, url)
 }
 
-func (s FileStrategy) GetByUser(userId int) ([]DTO.ShortItem, error) {
+func (s FileStrategy) GetByUser(userId *int) ([]DTO.ShortItem, error) {
 	data, err := repository.ReadFileStore(s.cfg)
 	if err != nil {
 		return make([]DTO.ShortItem, 0), err

@@ -85,7 +85,7 @@ func (s DBStrategy) GetShortByURL(u string) (string, error) {
 	return short, nil
 }
 
-func (s DBStrategy) GetByUser(userId int) ([]DTO.ShortItem, error) {
+func (s DBStrategy) GetByUser(userId *int) ([]DTO.ShortItem, error) {
 	sql := "SELECT short, url FROM url_short where created_by_user=$1 LIMIT 1"
 
 	row := s.db.QueryRow(sql, userId)

@@ -41,8 +41,7 @@ func setToStorage(cfg config.StorageConfig, parsedURL string) (string, error) {
 	for i := 0; i < 10; i++ {
 		id := GenerateHash()
 		strategy := strategy.GetStrategy(cfg)
-		userId := cfg.GetUserId()
-		if err := strategy.Save(id, parsedURL, nil, &userId); err != nil {
+		if err := strategy.Save(id, parsedURL, nil, cfg.GetUserId()); err != nil {
 			if errors.Is(err, repository.ErrorShortURLKeyAlreadyExists) {
 				continue
 			}

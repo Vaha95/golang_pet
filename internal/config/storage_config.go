@@ -26,8 +26,12 @@ func GetConfig(dbService DBService, isDBAllowed bool, mainConfig Config) Storage
 	}
 }
 
-func (cfg *StorageConfig) GetUserId() int {
-	return cfg.UserData.userId
+func (cfg *StorageConfig) GetUserId() *int {
+	if cfg.UserData == nil {
+		return nil
+	}
+
+	return &(cfg.UserData.userId)
 }
 
 func (cfg *StorageConfig) SetUserId(userId int) {
