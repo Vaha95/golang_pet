@@ -86,14 +86,24 @@ func (s DBStrategy) GetShortByURL(u string) (string, error) {
 }
 
 func (s DBStrategy) GetByUser(userId *int) ([]DTO.ShortItem, error) {
-	sql := "SELECT short, url FROM url_short where created_by_user=$1 LIMIT 1"
+	sql := "SELECT short, url FROM url_short where created_by_user=$1"
 
-	row := s.db.QueryRow(sql, userId)
+	rows, err := s.db.Query(sql, userId)
+
+	if err != nil {
+		return make([]dto.ShortItem, 0), fmt.Errorf("failed to parse data from DBRow: %w", err)
+	}
+	defer rows.Close()
+
+	rows.Columns()
 
 	var data []DTO.ShortItem
-	err := row.Scan(&data)
-	if err != nil || len(data) <= 0 {
-		return make([]dto.ShortItem, 0), fmt.Errorf("failed to parse data from DBRow: %w", err)
+	for rows.Next() {
+		var s DTO.ShortItem
+		if err := rows.Scan(&s.Short, &s.URL); err != nil {
+			return make([]dto.ShortItem, 0), err
+		}
+		data = append(data, s)
 	}
 
 	return data, nil
