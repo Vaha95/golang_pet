@@ -46,6 +46,7 @@ func main() {
 	e.POST(`/api/shorten`, handler.GetSaveURLShortenHandler(cfg, l))
 	e.GET(`/ping`, handler.GetPingDBHandler(dbService, l))
 	e.POST(`/api/shorten/batch`, handler.GetSaveURLBatchHandler(cfg, l))
+	e.GET(`/api/user/urls`, handler.GetURLByUserHandler(cfg, l))
 
 	err = mv.AddMiddlewares(cfg, e, l)
 	if err != nil {

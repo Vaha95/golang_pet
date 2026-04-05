@@ -4,10 +4,10 @@ import (
 	"net/http"
 
 	"github.com/Vaha95/golang_pet/internal/config"
+	DTO "github.com/Vaha95/golang_pet/internal/model/DTO"
+	saveurl "github.com/Vaha95/golang_pet/internal/service/save_url"
 	"github.com/labstack/echo/v5"
 	"go.uber.org/zap"
-	DTO "github.com/Vaha95/golang_pet/internal/model/DTO/save_url"
-	saveurl "github.com/Vaha95/golang_pet/internal/service/save_url"
 )
 
 func GetSaveURLBatchHandler(cfg config.StorageConfig, l *zap.SugaredLogger) func(c *echo.Context) error {

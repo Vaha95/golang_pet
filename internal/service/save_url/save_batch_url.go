@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/Vaha95/golang_pet/internal/config"
-	"github.com/Vaha95/golang_pet/internal/model/DTO/save_url"
+	"github.com/Vaha95/golang_pet/internal/model/DTO"
 	strategy "github.com/Vaha95/golang_pet/internal/repository/strategy/save_url"
 )
 

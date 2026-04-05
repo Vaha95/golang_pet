@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/Vaha95/golang_pet/internal/config"
+	"github.com/Vaha95/golang_pet/internal/model/DTO"
 	"github.com/Vaha95/golang_pet/internal/repository"
-	"github.com/Vaha95/golang_pet/internal/model/DTO/save_url"
 )
 
 type FileStrategy struct {
@@ -80,4 +80,25 @@ func (s FileStrategy) GetShortByURL(url string) (string, error) {
 	}
 
 	return "", fmt.Errorf("%w: %s", repository.ErrorURLNotFound, url)
+}
+
+func (s FileStrategy) GetByUser(userId int) ([]DTO.ShortItem, error) {
+	data, err := repository.ReadFileStore(s.cfg)
+	if err != nil {
+		return make([]DTO.ShortItem, 0), err
+	}
+	if data == nil {
+		return make([]DTO.ShortItem, 0), fmt.Errorf("%w: %d", repository.ErrorURLByUserNotFound, userId)
+	}
+
+	result := make([]DTO.ShortItem, len(data))
+	for short, u := range data {
+		result = append(result, DTO.ShortItem{Short: short, URL: u})
+	}
+
+	if len(result) > 0 {
+		return result, nil
+	}
+
+	return make([]DTO.ShortItem, 0), fmt.Errorf("%w: %d", repository.ErrorURLByUserNotFound, userId)
 }
