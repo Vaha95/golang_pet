@@ -6,8 +6,8 @@ import (
 )
 
 type URLStrategy interface {
-	Save(short string, url string, extId *string) error
-	SaveBatch(data []DTO.BatchItem, GenerateHash func() string) error
+	Save(short string, url string, extId *string, userId *int) error
+	SaveBatch(data []DTO.BatchItem, userId *int, GenerateHash func() string) error
 	Get(key string) (string, error)
 	GetShortByURL(url string) (string, error)
 }

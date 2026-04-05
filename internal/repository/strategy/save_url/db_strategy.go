@@ -15,9 +15,9 @@ type DBStrategy struct {
 	cfg config.Config
 }
 
-func (s DBStrategy) Save(short string, url string, extId *string) error {
-	sql := "INSERT INTO url_short (url,short,ext_id) VALUES ($1,$2,$3) ON CONFLICT (url) DO NOTHING"
-	_, err := s.db.Exec(sql, url, short, extId)
+func (s DBStrategy) Save(short string, url string, extId *string, userId *int) error {
+	sql := "INSERT INTO url_short (url, short, ext_id, created_by_user) VALUES ($1,$2,$3,$4) ON CONFLICT (url) DO NOTHING"
+	_, err := s.db.Exec(sql, url, short, extId, *userId)
 
 	if err != nil {
 		return err
@@ -26,17 +26,17 @@ func (s DBStrategy) Save(short string, url string, extId *string) error {
 	return nil
 }
 
-func (s DBStrategy) SaveBatch(data []dto.BatchItem, generateHash func() string) error {    
+func (s DBStrategy) SaveBatch(data []dto.BatchItem, userId *int, generateHash func() string) error {    
 	valueStrings := make([]string, 0, len(data))
-    valueArgs := make([]interface{}, 0, len(data) * 3)
+    valueArgs := make([]interface{}, 0, len(data) * 4)
     for k, batch := range data {
 		id := generateHash()
-		i := (k+1)*3
-        valueStrings = append(valueStrings, fmt.Sprintf("($%d, $%d, $%d)", i-2, i-1, i))
-        valueArgs = append(valueArgs, id, batch.URL, batch.ExtId)
+		i := (k+1)*4
+        valueStrings = append(valueStrings, fmt.Sprintf("($%d, $%d, $%d, $%d)", i-3, i-2, i-1, i))
+        valueArgs = append(valueArgs, id, batch.URL, batch.ExtId, userId)
     }
 
-    stmt := fmt.Sprintf("INSERT INTO url_short (short,url,ext_id) VALUES %s ON CONFLICT (url) DO NOTHING", 
+    stmt := fmt.Sprintf("INSERT INTO url_short (short,url, ext_id, created_by_user) VALUES %s ON CONFLICT (url) DO NOTHING", 
                         strings.Join(valueStrings, ","))
     _, err := s.db.Exec(stmt, valueArgs...)
 

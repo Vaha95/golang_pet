@@ -12,7 +12,7 @@ type FileStrategy struct {
 	cfg config.Config
 }
 
-func (s FileStrategy) Save(short string, url string, extId *string) error {
+func (s FileStrategy) Save(short string, url string, extId *string, userId *int) error {
 	data, err := repository.ReadFileStore(s.cfg)
 	if err != nil {
 		return err
@@ -32,12 +32,12 @@ func (s FileStrategy) Save(short string, url string, extId *string) error {
 	return nil
 }
 
-func (s FileStrategy) SaveBatch(data []DTO.BatchItem, GenerateHash func() string) error {
+func (s FileStrategy) SaveBatch(data []DTO.BatchItem, userId *int, GenerateHash func() string) error {
 	for i := 0; i < len(data); i++ {
 		item := &data[i]
 
 		id := GenerateHash()
-		err := s.Save(id, item.URL, nil)
+		err := s.Save(id, item.URL, nil, userId)
 		if err != nil {
 			return fmt.Errorf("failed to save the short URL to file: %w", err)
 		}

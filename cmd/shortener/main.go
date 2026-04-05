@@ -8,7 +8,7 @@ import (
 	"github.com/Vaha95/golang_pet/internal/config"
 	"github.com/Vaha95/golang_pet/internal/config/db"
 	"github.com/Vaha95/golang_pet/internal/handler"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"go.uber.org/zap"
 
 	mv "github.com/Vaha95/golang_pet/internal/infrastructure/middleware"
@@ -44,10 +44,10 @@ func main() {
 	e.GET(`/:id`, handler.GetURLHandler(cfg, l))
 	e.POST(`/`, handler.GetSaveURLHandler(cfg, l))
 	e.POST(`/api/shorten`, handler.GetSaveURLShortenHandler(cfg, l))
-	e.GET(`/ping`, handler.GetPingDBHandler(dbService))
+	e.GET(`/ping`, handler.GetPingDBHandler(dbService, l))
 	e.POST(`/api/shorten/batch`, handler.GetSaveURLBatchHandler(cfg, l))
 
-	err = mv.AddMiddlewares(e, l)
+	err = mv.AddMiddlewares(cfg, e, l)
 	if err != nil {
 		log.Fatal(
 			fmt.Errorf("can`t start Web server: %w", err).Error(),

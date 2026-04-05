@@ -1,0 +1,1 @@
+ALTER TABLE url_short ADD COLUMN created_by_user INT NULL;
