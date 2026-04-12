@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/Vaha95/golang_pet/internal/config"
-	"github.com/labstack/echo/v5"
+	"github.com/labstack/echo/v4"
 	"go.uber.org/zap"
 )
 
