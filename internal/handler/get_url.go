@@ -21,6 +21,9 @@ func GetURLHandler(cfg config.StorageConfig, l *zap.SugaredLogger) func(c *echo.
 		if err != nil && errors.Is(err, repository.ErrorShortURLKeyNotFound) {
 			return c.JSON(http.StatusNotFound, "URL is not found")
 		}
+		if data == nil {
+			return c.JSON(http.StatusNotFound, "Data is not found")	
+		}
 		if data.DeletedAt != "" {
 			return c.NoContent(http.StatusGone)			
 		}
