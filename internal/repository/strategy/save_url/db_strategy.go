@@ -57,18 +57,18 @@ func (s DBStrategy) SaveBatch(data []dto.BatchItem, userId *int, generateHash fu
 	return err
 }
 
-func (s DBStrategy) Get(short string) (string, error) {
-	sql := "SELECT url FROM url_short where short=$1 LIMIT 1"
+func (s DBStrategy) Get(short string) (*DTO.ShortItem, error) {
+	sql := "SELECT url, short, deleted_at FROM url_short where short=$1 LIMIT 1"
 
 	row := s.db.QueryRow(sql, short)
 
-	var url string
-	err := row.Scan(&url)
-	if err != nil || url == "" {
-		return "", fmt.Errorf("failed to parse URL from DBRow: %w", err)
+	var data DTO.ShortItem
+	err := row.Scan(&data.URL, &data.Short, &data.DeletedAt)
+	if err != nil || data.URL == "" {
+		return nil, fmt.Errorf("failed to parse URL from DBRow: %w", err)
 	}
 
-	return url, nil
+	return &data, nil
 }
 
 func (s DBStrategy) GetShortByURL(u string) (string, error) {
@@ -107,4 +107,23 @@ func (s DBStrategy) GetByUser(userId *int) ([]DTO.ShortItem, error) {
 	}
 
 	return data, nil
+}
+
+func (s DBStrategy) DeleteBatch(data DTO.DeleteBatch) (error) {
+	batch := data.Shorts
+
+	valueStrings := make([]string, 0, len(batch))
+	valueArgs := make([]interface{}, 0, len(batch) * 2)
+
+	for k, short := range batch {
+		i := (k+1) * 2
+		valueStrings = append(valueStrings, fmt.Sprintf("(short = $%d AND created_by_user=$%d)", i-1, i))
+		valueArgs = append(valueArgs, short, data.UserId)
+	}
+
+	stmt := fmt.Sprintf("UPDATE url_short SET deleted_at = now() WHERE (%s)",
+		strings.Join(valueStrings, ") OR ("))
+	_, err := s.db.Exec(stmt, valueArgs...)
+
+	return err
 }

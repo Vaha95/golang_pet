@@ -8,9 +8,10 @@ import (
 type URLStrategy interface {
 	Save(short string, url string, extId *string, userId *int) error
 	SaveBatch(data []DTO.BatchItem, userId *int, GenerateHash func() string) error
-	Get(key string) (string, error)
+	Get(key string) (*DTO.ShortItem, error)
 	GetShortByURL(url string) (string, error)
 	GetByUser(userId *int) ([]DTO.ShortItem, error)
+	DeleteBatch(DTO.DeleteBatch) (error)
 }
 
 func GetStrategy(cfg config.StorageConfig) URLStrategy {

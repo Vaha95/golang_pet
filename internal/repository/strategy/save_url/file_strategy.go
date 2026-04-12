@@ -2,6 +2,7 @@ package repository
 
 import (
 	"fmt"
+	"slices"
 
 	"github.com/Vaha95/golang_pet/internal/config"
 	"github.com/Vaha95/golang_pet/internal/model/DTO"
@@ -48,20 +49,20 @@ func (s FileStrategy) SaveBatch(data []DTO.BatchItem, userId *int, GenerateHash 
 	return nil
 }
 
-func (s FileStrategy) Get(key string) (string, error) {
+func (s FileStrategy) Get(key string) (*DTO.ShortItem, error) {
 	data, err := repository.ReadFileStore(s.cfg)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	if data == nil {
 		data = map[string]string{}
 	}
 	val, ok := data[key]
 	if !ok {
-		return "", fmt.Errorf("%w: %s", repository.ErrorShortURLKeyNotFound, key)
+		return nil, fmt.Errorf("%w: %s", repository.ErrorShortURLKeyNotFound, key)
 	}
 
-	return val, nil
+	return &DTO.ShortItem{URL: val}, nil
 }
 
 func (s FileStrategy) GetShortByURL(url string) (string, error) {
@@ -101,4 +102,24 @@ func (s FileStrategy) GetByUser(userId *int) ([]DTO.ShortItem, error) {
 	}
 
 	return make([]DTO.ShortItem, 0), fmt.Errorf("%w: %d", repository.ErrorURLByUserNotFound, userId)
+}
+
+func (s FileStrategy) DeleteBatch(inp DTO.DeleteBatch) (error) {
+	batch := inp.Shorts
+	data, err := repository.ReadFileStore(s.cfg)
+	if err != nil {
+		return err
+	}
+	if data == nil {
+		return fmt.Errorf("%w", repository.ErrorURLNotFound)
+	}
+
+	for short, _ := range data {
+		if slices.Contains(batch, short) {
+			delete(data, short)
+		}
+	}
+	repository.WriteFileStore(s.cfg, data)
+
+	return nil
 }

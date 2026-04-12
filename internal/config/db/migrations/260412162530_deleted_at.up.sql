@@ -1,0 +1,1 @@
+ALTER TABLE url_short ADD COLUMN deleted_at TIMESTAMP NULL;
