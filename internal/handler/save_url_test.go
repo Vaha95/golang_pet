@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/Vaha95/golang_pet/internal/config"
-	"github.com/labstack/echo/v5"
+	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

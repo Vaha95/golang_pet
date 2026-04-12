@@ -8,7 +8,7 @@ import (
 
 	"github.com/Vaha95/golang_pet/internal/config"
 	"github.com/Vaha95/golang_pet/internal/repository"
-	"github.com/labstack/echo/v5"
+	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -35,9 +35,9 @@ func TestGetUrl(t *testing.T) {
 	h := GetURLHandler(stCfg, l)
 
 	c := echo.New().NewContext(request, w)
-	c.SetPathValues(echo.PathValues{
-		{Name: "id", Value: id},
-	})
+	c.SetParamNames("id")
+	c.SetParamValues(id)
+
 	h(c)
 
 	res := w.Result()
