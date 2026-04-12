@@ -18,13 +18,20 @@ func GetURLHandler(cfg config.StorageConfig, l *zap.SugaredLogger) func(c *echo.
 
 		s := strategy.GetStrategy(cfg)
 		data, err := s.Get(id)
-		if err != nil && errors.Is(err, repository.ErrorShortURLKeyNotFound) {
-			return c.JSON(http.StatusNotFound, "URL is not found")
+		if err != nil {
+			if errors.Is(err, repository.ErrorShortURLKeyNotFound) {
+				return c.JSON(http.StatusNotFound, "URL is not found")
+			}
+
+			l.Errorf("Failed to get url from DB: %w", err)
+
+			return c.NoContent(http.StatusInternalServerError)
 		}
+		
 		if data == nil {
-			return c.JSON(http.StatusNotFound, "Data is not found")	
+			return c.JSON(http.StatusNotFound, err.Error())	
 		}
-		if data.DeletedAt != "" {
+		if data.DeletedAt != nil {
 			return c.NoContent(http.StatusGone)			
 		}
 		if data.URL == "" {
