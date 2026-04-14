@@ -124,7 +124,7 @@ func (s DBStrategy) DeleteBatch(data DTO.DeleteBatch) (error) {
 
 	for k, short := range batch {
 		i := (k+1) * 2
-		valueStrings = append(valueStrings, fmt.Sprintf("(short = $%d AND created_by_user=$%d)", i-1, i))
+		valueStrings = append(valueStrings, fmt.Sprintf("short = $%d AND created_by_user=$%d AND deleted_at=NULL", i-1, i))
 		valueArgs = append(valueArgs, short, data.UserId)
 	}
 
