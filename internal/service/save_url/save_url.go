@@ -47,7 +47,12 @@ func setToStorage(cfg config.StorageConfig, parsedURL string) (string, error) {
 			}
 
 			if errors.Is(err, strategy.ErrorUrlAlreadyExists) {
-				return id, fmt.Errorf("failed to find short by URL: %w", ErrorUrlAlreadyExists)
+				id, err = strg.GetShortByURL(parsedURL)
+				if err != nil {
+					return id, fmt.Errorf("failed to find short by URL: %w", err)
+				}
+
+				return id, fmt.Errorf("failed to save new URL: %w", ErrorUrlAlreadyExists)
 			}
 
 			return "", fmt.Errorf("failed to save the short URL: %w", err)
