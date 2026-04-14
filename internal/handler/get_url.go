@@ -6,14 +6,14 @@ import (
 
 	"github.com/Vaha95/golang_pet/internal/config"
 	"github.com/Vaha95/golang_pet/internal/repository"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"go.uber.org/zap"
 
 	strategy "github.com/Vaha95/golang_pet/internal/repository/strategy/save_url"
 )
 
-func GetURLHandler(cfg config.StorageConfig, l *zap.SugaredLogger) func(c echo.Context) error {
-	return func(c echo.Context) error {
+func GetURLHandler(cfg config.StorageConfig, l *zap.SugaredLogger) func(c *echo.Context) error {
+	return func(c *echo.Context) error {
 		id := c.Param("id")
 
 		s := strategy.GetStrategy(cfg)

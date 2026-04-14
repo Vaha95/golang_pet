@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"net/url"
 	"strings"
@@ -15,12 +16,18 @@ type DBStrategy struct {
 	db  *sql.DB
 	cfg config.Config
 }
+var ErrorUrlAlreadyExists = errors.New("short URL already exists")
 
 func (s DBStrategy) Save(short string, url string, extId *string, userId *int) error {
-	sql := "INSERT INTO url_short (url, short, ext_id, created_by_user) VALUES ($1,$2,$3,$4) ON CONFLICT (url) DO NOTHING"
-	_, err := s.db.Exec(sql, url, short, extId, *userId)
+	query := "INSERT INTO url_short (url, short, ext_id, created_by_user) VALUES ($1,$2,$3,$4) ON CONFLICT (url) DO NOTHING RETURNING short"
+	var res string
+	err := s.db.QueryRow(query, url, short, extId, *userId).Scan(&res)
 
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return fmt.Errorf("failed to find short by URL: %w", ErrorUrlAlreadyExists)
+		}
+		
 		return err
 	}
 
@@ -58,12 +65,12 @@ func (s DBStrategy) SaveBatch(data []dto.BatchItem, userId *int, generateHash fu
 }
 
 func (s DBStrategy) Get(short string) (*DTO.ShortItem, error) {
-	sql := "SELECT url, short, deleted_at FROM url_short where short=$1 LIMIT 1"
+	sql := "SELECT url, deleted_at FROM url_short where short=$1 LIMIT 1"
 
 	row := s.db.QueryRow(sql, short)
 
 	var data DTO.ShortItem
-	err := row.Scan(&data.URL, &data.Short, &data.DeletedAt)
+	err := row.Scan(&data.URL, &data.DeletedAt)
 	if err != nil || data.URL == "" {
 		return nil, fmt.Errorf("failed to parse URL from DBRow: %w", err)
 	}

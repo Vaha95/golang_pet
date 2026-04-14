@@ -5,14 +5,14 @@ import (
 	"net/http"
 
 	"github.com/Vaha95/golang_pet/internal/config"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"go.uber.org/zap"
 
 	saveurl "github.com/Vaha95/golang_pet/internal/service/save_url"
 )
 
-func GetSaveURLShortenHandler(cfg config.StorageConfig, l *zap.SugaredLogger) func(c echo.Context) error {
-	return func(c echo.Context) error {
+func GetSaveURLShortenHandler(cfg config.StorageConfig, l *zap.SugaredLogger) func(c *echo.Context) error {
+	return func(c *echo.Context) error {
 		type APIReqiest struct {
 			URI string `json:"url"`
 		}

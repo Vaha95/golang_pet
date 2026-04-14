@@ -4,15 +4,15 @@ import (
 	"net/http"
 
 	"github.com/Vaha95/golang_pet/internal/config"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"go.uber.org/zap"
 
 	DTO "github.com/Vaha95/golang_pet/internal/model/DTO"
 	saveurl "github.com/Vaha95/golang_pet/internal/service/save_url"
 )
 
-func GetSaveURLBatchHandler(cfg config.StorageConfig, l *zap.SugaredLogger) func(c echo.Context) error {
-	return func(c echo.Context) error {
+func GetSaveURLBatchHandler(cfg config.StorageConfig, l *zap.SugaredLogger) func(c *echo.Context) error {
+	return func(c *echo.Context) error {
 		type APIReqiest struct {
 			ExtId string `json:"correlation_id"`
 			URL   string `json:"original_url"`

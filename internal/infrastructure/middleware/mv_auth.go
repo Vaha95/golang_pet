@@ -8,7 +8,7 @@ import (
 	"github.com/Vaha95/golang_pet/internal/config"
 	"github.com/Vaha95/golang_pet/internal/repository"
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"go.uber.org/zap"
 )
 
@@ -26,7 +26,7 @@ type Claims struct {
 
 func addAuthMiddleware(cfg config.StorageConfig, e *echo.Echo, l *zap.SugaredLogger) {
 	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
+		return func(c *echo.Context) error {
 			if cfg.IsDBAllowed {
 				token, err := readCookie(c)
 
@@ -93,7 +93,7 @@ func getUserID(tokenString string) int {
     return claims.UserID
 }
 
-func writeCookie(c echo.Context, token string) {
+func writeCookie(c *echo.Context, token string) {
 	cookie := new(http.Cookie)
 
 	cookie.Name = COOKIE_KEY
@@ -104,7 +104,7 @@ func writeCookie(c echo.Context, token string) {
 	c.SetCookie(cookie)
 }
 
-func readCookie(c echo.Context) (string, error) {
+func readCookie(c *echo.Context) (string, error) {
 	cookie, err := c.Cookie(COOKIE_KEY)
 	if err != nil {
 		return "", err
