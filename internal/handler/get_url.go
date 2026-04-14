@@ -31,13 +31,13 @@ func GetURLHandler(cfg config.StorageConfig, l *zap.SugaredLogger) func(c *echo.
 		if data == nil {
 			return c.JSON(http.StatusNotFound, err.Error())	
 		}
-		if data.DeletedAt != nil {
-			return c.JSON(http.StatusGone, "")			
-		}
 		if data.URL == "" {
 			l.Errorf("Url is empty")
 
 			return c.NoContent(http.StatusInternalServerError)
+		}
+		if data.DeletedAt != nil {
+			return c.JSON(http.StatusGone, data.URL)			
 		}
 
 		return c.Redirect(http.StatusTemporaryRedirect, data.URL)
