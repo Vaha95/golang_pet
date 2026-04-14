@@ -19,7 +19,7 @@ type DBStrategy struct {
 var ErrorUrlAlreadyExists = errors.New("short URL already exists")
 
 func (s DBStrategy) Save(short string, url string, extId *string, userId *int) error {
-	query := "INSERT INTO url_short (url, short, ext_id, created_by_user) VALUES ($1,$2,$3,$4) ON CONFLICT (url) DO NOTHING RETURNING short"
+	query := "INSERT INTO url_short (url, short, ext_id, created_by_user) VALUES ($1,$2,$3,$4) ON CONFLICT (url) WHERE (deleted_at IS NULL) DO NOTHING RETURNING short"
 	var res string
 	err := s.db.QueryRow(query, url, short, extId, *userId).Scan(&res)
 
@@ -44,7 +44,7 @@ func (s DBStrategy) SaveBatch(data []dto.BatchItem, userId *int, generateHash fu
 		valueArgs = append(valueArgs, id, batch.URL, batch.ExtId, userId)
 	}
 
-	stmt := fmt.Sprintf("INSERT INTO url_short (short,url, ext_id, created_by_user) VALUES %s ON CONFLICT (url) DO NOTHING",
+	stmt := fmt.Sprintf("INSERT INTO url_short (short,url, ext_id, created_by_user) VALUES %s ON CONFLICT (url) WHERE (deleted_at IS NULL) DO NOTHING",
 		strings.Join(valueStrings, ","))
 	_, err := s.db.Exec(stmt, valueArgs...)
 
