@@ -32,7 +32,7 @@ func GetURLHandler(cfg config.StorageConfig, l *zap.SugaredLogger) func(c *echo.
 			return c.JSON(http.StatusNotFound, err.Error())	
 		}
 		if data.DeletedAt != nil {
-			return c.NoContent(http.StatusGone)			
+			return c.JSON(http.StatusGone, "")			
 		}
 		if data.URL == "" {
 			l.Errorf("Url is empty")
