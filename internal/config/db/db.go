@@ -52,6 +52,10 @@ func сonnectToDB(cfg Config) (*sql.DB, error) {
 	return db, nil
 }
 
+func setSettings(s *Service) {
+	s.db.Exec("SET LOCAL synchronous_commit TO OFF")
+}
+
 func InitDb(mainConfig config.Config) (*Service, error) {
 	cfg := Config{
 		DSN: mainConfig.DbDSN,
@@ -70,5 +74,8 @@ func InitDb(mainConfig config.Config) (*Service, error) {
 		return nil, fmt.Errorf("Failed to migrate: %v", err)
 	}
 
-	return NewService(db), nil
+	service := NewService(db)
+	setSettings(service)
+
+	return service, nil
 }
