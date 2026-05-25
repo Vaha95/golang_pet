@@ -5,9 +5,11 @@ import (
 	"net/http"
 
 	"github.com/Vaha95/golang_pet/internal/config"
+	"github.com/Vaha95/golang_pet/internal/model/DTO"
 	"github.com/labstack/echo/v5"
 	"go.uber.org/zap"
 
+	"github.com/Vaha95/golang_pet/internal/service/audit"
 	saveurl "github.com/Vaha95/golang_pet/internal/service/save_url"
 )
 
@@ -38,6 +40,7 @@ func GetSaveURLShortenHandler(cfg config.StorageConfig, l *zap.SugaredLogger) fu
 				return c.JSON(http.StatusBadRequest, err.Error())
 			}
 		}
+		audit.PushToAudit(cfg.Config, DTO.CrateBaseAuditItemShorten(data.URI, *cfg.GetUserId()))
 
 		return c.JSON(http.StatusCreated, APIResponse{Result: path})
 	}

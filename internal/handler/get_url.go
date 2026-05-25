@@ -5,7 +5,9 @@ import (
 	"net/http"
 
 	"github.com/Vaha95/golang_pet/internal/config"
+	"github.com/Vaha95/golang_pet/internal/model/DTO"
 	"github.com/Vaha95/golang_pet/internal/repository"
+	"github.com/Vaha95/golang_pet/internal/service/audit"
 	"github.com/labstack/echo/v5"
 	"go.uber.org/zap"
 
@@ -36,6 +38,9 @@ func GetURLHandler(cfg config.StorageConfig, l *zap.SugaredLogger) func(c *echo.
 
 			return c.NoContent(http.StatusInternalServerError)
 		}
+
+		audit.PushToAudit(cfg.Config, DTO.CrateBaseAuditItemFollow(data.URL, *cfg.GetUserId()))
+		
 		if data.DeletedAt != nil {
 			return c.JSON(http.StatusGone, data.URL)			
 		}
