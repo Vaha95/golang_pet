@@ -39,7 +39,7 @@ func GetURLHandler(cfg config.StorageConfig, l *zap.SugaredLogger) func(c *echo.
 			return c.NoContent(http.StatusInternalServerError)
 		}
 
-		audit.PushToAudit(cfg.Config, DTO.CrateBaseAuditItemFollow(data.URL, *cfg.GetUserId()))
+		audit.PushToAudit(cfg.Config, DTO.CrateBaseAuditItemFollow(data.URL, cfg.GetUserId()))
 		
 		if data.DeletedAt != nil {
 			return c.JSON(http.StatusGone, data.URL)			

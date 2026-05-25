@@ -37,7 +37,7 @@ func GetSaveURLHandler(cfg config.StorageConfig, l *zap.SugaredLogger) func(c *e
 				return c.JSON(http.StatusBadRequest, err.Error())
 			}
 		}
-		audit.PushToAudit(cfg.Config, DTO.CrateBaseAuditItemShorten(inputURL, *cfg.GetUserId()))
+		audit.PushToAudit(cfg.Config, DTO.CrateBaseAuditItemShorten(inputURL, cfg.GetUserId()))
 
 		return c.String(http.StatusCreated, path)
 	}

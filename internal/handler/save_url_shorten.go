@@ -40,7 +40,7 @@ func GetSaveURLShortenHandler(cfg config.StorageConfig, l *zap.SugaredLogger) fu
 				return c.JSON(http.StatusBadRequest, err.Error())
 			}
 		}
-		audit.PushToAudit(cfg.Config, DTO.CrateBaseAuditItemShorten(data.URI, *cfg.GetUserId()))
+		audit.PushToAudit(cfg.Config, DTO.CrateBaseAuditItemShorten(data.URI, cfg.GetUserId()))
 
 		return c.JSON(http.StatusCreated, APIResponse{Result: path})
 	}
