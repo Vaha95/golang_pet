@@ -39,7 +39,7 @@ func addAuthMiddleware(cfg config.StorageConfig, e *echo.Echo, l *zap.SugaredLog
 						return err
 					}
 
-					token, err := buildJWTString()
+					token, err := buildJWTString(userId)
 					if err != nil {
 						l.Errorf("buildJWTString err: %w", err)
 
@@ -57,12 +57,12 @@ func addAuthMiddleware(cfg config.StorageConfig, e *echo.Echo, l *zap.SugaredLog
 	})
 }
 
-func buildJWTString() (string, error) {
+func buildJWTString(userId int) (string, error) {
     token := jwt.NewWithClaims(jwt.SigningMethodHS256, Claims {
         RegisteredClaims: jwt.RegisteredClaims{
             ExpiresAt: jwt.NewNumericDate(time.Now().Add(TOKEN_EXP)),
         },
-        UserID: 1,
+        UserID: userId,
     })
 
     tokenString, err := token.SignedString([]byte(SECRET_KEY))
