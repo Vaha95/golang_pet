@@ -124,13 +124,17 @@ func (s DBStrategy) DeleteBatch(data DTO.DeleteBatch) (error) {
 
 	for k, short := range batch {
 		i := (k+1) * 2
-		valueStrings = append(valueStrings, fmt.Sprintf("short = $%d AND created_by_user=$%d AND deleted_at=NULL", i-1, i))
+		valueStrings = append(valueStrings, fmt.Sprintf("short = $%d AND created_by_user=$%d AND deleted_at IS NULL", i-1, i))
 		valueArgs = append(valueArgs, short, data.UserId)
 	}
 
 	stmt := fmt.Sprintf("UPDATE url_short SET deleted_at = now() WHERE (%s)",
 		strings.Join(valueStrings, ") OR ("))
 	_, err := s.db.Exec(stmt, valueArgs...)
+
+	if err != nil {
+		return err
+	}
 
 	return err
 }
