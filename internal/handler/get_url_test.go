@@ -48,3 +48,6 @@ func TestGetUrl(t *testing.T) {
 	loc := res.Header.Get("Location")
 	require.Equal(t, url, loc)
 }
+
+func BenchmarkTest(b *testing.B) {
+}
