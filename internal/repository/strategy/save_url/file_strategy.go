@@ -114,7 +114,7 @@ func (s FileStrategy) DeleteBatch(inp DTO.DeleteBatch) error {
 		return fmt.Errorf("%w", repository.ErrorURLNotFound)
 	}
 
-	for short, _ := range data {
+	for short := range data {
 		if slices.Contains(batch, short) {
 			delete(data, short)
 		}
