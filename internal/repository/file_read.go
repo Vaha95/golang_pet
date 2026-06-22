@@ -10,6 +10,7 @@ import (
 
 var rmu sync.RWMutex
 
+// ReadFileStore reads the JSON data file and returns the short-to-URL mapping.
 func ReadFileStore(cfg config.Config) (map[string]string, error) {
 	rmu.RLock()
 	defer rmu.RUnlock()

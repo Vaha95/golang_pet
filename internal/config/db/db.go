@@ -12,6 +12,7 @@ import (
 	_ "github.com/jackc/pgx/v5/stdlib" // регистрация драйвера pgx
 )
 
+// ErrorDBDsnEmpty indicates that the database DSN was not provided.
 var ErrorDBDsnEmpty = errors.New("DB dsn is empty")
 
 // Config содержит параметры подключения к PostgreSQL
@@ -57,6 +58,7 @@ func setSettings(s *Service) {
 	s.db.Exec("SET LOCAL synchronous_commit TO OFF")
 }
 
+// InitDb connects to the database, runs migrations, and returns a ready Service.
 func InitDb(mainConfig config.Config) (*Service, error) {
 	cfg := Config{
 		DSN:             mainConfig.DbDSN,

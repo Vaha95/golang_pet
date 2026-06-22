@@ -5,6 +5,7 @@ import (
 	"fmt"
 )
 
+// CreateUser inserts a new row into the users table and returns the generated ID.
 func CreateUser(db *sql.DB) (int, error) {
 	sql := "INSERT INTO users DEFAULT VALUES RETURNING id;"
 

@@ -14,6 +14,7 @@ import (
 	saveurl "github.com/Vaha95/golang_pet/internal/service/save_url"
 )
 
+// GetSaveURLHandler returns an Echo handler that saves a raw URL from the request body and returns the short path.
 func GetSaveURLHandler(cfg config.StorageConfig, l *zap.SugaredLogger) func(c *echo.Context) error {
 	return func(c *echo.Context) error {
 		req := c.Request()

@@ -12,13 +12,19 @@ import (
 	"go.uber.org/zap"
 )
 
+// JWT configuration constants for authentication.
 const (
+	// SECRET_KEY is the symmetric key used to sign and verify JWT tokens.
 	SECRET_KEY = "SECRET_KEY"
-	TOKEN_EXP  = time.Hour * 3
+	// TOKEN_EXP is the validity duration of a JWT token.
+	TOKEN_EXP = time.Hour * 3
+	// COOKIE_KEY is the cookie name that stores the JWT token.
 	COOKIE_KEY = "auth_token"
+	// COOKIE_EXP is the expiry duration of the authentication cookie.
 	COOKIE_EXP = time.Hour * 24
 )
 
+// Claims holds the JWT payload along with the embedded user ID.
 type Claims struct {
 	jwt.RegisteredClaims
 	UserID int

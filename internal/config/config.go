@@ -5,6 +5,7 @@ import (
 	"os"
 )
 
+// Config holds application configuration read from environment variables or flags.
 type Config struct {
 	ListenHost    string
 	URLHost       string

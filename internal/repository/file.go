@@ -11,9 +11,13 @@ import (
 	"github.com/Vaha95/golang_pet/internal/config"
 )
 
+// File system paths used by the file-based storage.
 const (
+	// MainDir is the root directory for local file storage.
 	MainDir           = `./var`
+	// FilenameDirPrefix is the full directory path where data files are stored.
 	FilenameDirPrefix = MainDir + `/storage/data`
+	// Filename is the default name of the JSON data file.
 	Filename          = `urls-data.json`
 )
 

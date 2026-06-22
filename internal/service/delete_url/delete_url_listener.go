@@ -10,6 +10,7 @@ import (
 	strategy "github.com/Vaha95/golang_pet/internal/repository/strategy/save_url"
 )
 
+// GetDeleteUrlListener returns a function that runs an async deletion worker.
 func GetDeleteUrlListener(cfg config.StorageConfig, deleteCh chan DTO.DeleteBatch, l *zap.SugaredLogger) func() {
 	return func() {
 		for {

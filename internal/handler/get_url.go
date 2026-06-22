@@ -14,6 +14,7 @@ import (
 	strategy "github.com/Vaha95/golang_pet/internal/repository/strategy/save_url"
 )
 
+// GetURLHandler returns an Echo handler that resolves a short URL and redirects to the original.
 func GetURLHandler(cfg config.StorageConfig, l *zap.SugaredLogger) func(c *echo.Context) error {
 	return func(c *echo.Context) error {
 		id := c.Param("id")

@@ -12,6 +12,7 @@ import (
 	"github.com/labstack/gommon/log"
 )
 
+// PushToAudit sends an audit event to both a local file and a remote HTTP endpoint.
 func PushToAudit(cfg config.Config, dto DTO.BaseAuditItem) {
 	jsonData, err := json.Marshal(dto)
 	if err != nil {

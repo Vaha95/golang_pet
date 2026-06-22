@@ -9,6 +9,7 @@ import (
 	"github.com/Vaha95/golang_pet/internal/repository"
 )
 
+// FileStrategy implements URLStrategy using a JSON file as the backend.
 type FileStrategy struct {
 	cfg config.Config
 }

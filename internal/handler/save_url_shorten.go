@@ -13,6 +13,7 @@ import (
 	saveurl "github.com/Vaha95/golang_pet/internal/service/save_url"
 )
 
+// GetSaveURLShortenHandler returns an Echo handler that creates a short URL from a JSON request body.
 func GetSaveURLShortenHandler(cfg config.StorageConfig, l *zap.SugaredLogger) func(c *echo.Context) error {
 	return func(c *echo.Context) error {
 		type APIReqiest struct {

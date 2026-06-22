@@ -13,6 +13,7 @@ import (
 	strategy "github.com/Vaha95/golang_pet/internal/repository/strategy/save_url"
 )
 
+// GetURLByUserHandler returns an Echo handler that lists all short URLs created by the authenticated user.
 func GetURLByUserHandler(cfg config.StorageConfig, l *zap.SugaredLogger) func(c *echo.Context) error {
 	return func(c *echo.Context) error {
 		s := strategy.GetStrategy(cfg)

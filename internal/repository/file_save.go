@@ -10,6 +10,7 @@ import (
 
 var mu sync.RWMutex
 
+// WriteFileStore serializes the short-to-URL mapping and writes it to the JSON data file.
 func WriteFileStore(cfg config.Config, store map[string]string) error {
 	mu.Lock()
 	defer mu.Unlock()

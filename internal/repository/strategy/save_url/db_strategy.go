@@ -12,12 +12,16 @@ import (
 	dto "github.com/Vaha95/golang_pet/internal/model/DTO"
 )
 
+// DBStrategy implements URLStrategy using PostgreSQL as the backend.
 type DBStrategy struct {
 	db  *sql.DB
 	cfg config.Config
 }
 
+// ErrorUrlAlreadyExists is returned when saving a URL that was already shortened.
 var ErrorUrlAlreadyExists = errors.New("short URL already exists")
+
+// ErrorUrlNotFound is returned when the URL doesn't exist in the database.
 var ErrorUrlNotFound = errors.New("URL not found")
 
 func (s DBStrategy) Save(short string, url string, extId *string, userId *int) error {

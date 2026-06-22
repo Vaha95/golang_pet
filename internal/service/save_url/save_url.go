@@ -13,6 +13,7 @@ import (
 	strategy "github.com/Vaha95/golang_pet/internal/repository/strategy/save_url"
 )
 
+// SaveURL validates and persists a single URL, returning the full short URL path.
 func SaveURL(cfg config.StorageConfig, inputURL string) (string, error) {
 	parsedURL, err := url.ParseRequestURI(inputURL)
 	if err != nil {
@@ -64,6 +65,7 @@ func setToStorage(cfg config.StorageConfig, parsedURL string) (string, error) {
 	return "", errors.New("ID generate is impossible")
 }
 
+// GenerateHash produces a random 8-character alphanumeric short URL key.
 func GenerateHash() string {
 	rand.New((rand.NewSource(time.Now().UnixNano())))
 	chars := []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
