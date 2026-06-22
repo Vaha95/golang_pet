@@ -107,7 +107,7 @@ func (s DBStrategy) GetByUser(userId *int) ([]DTO.ShortItem, error) {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, fmt.Errorf("failed to find URL: %w", ErrorUrlNotFound)
 		}
-		
+
 		return make([]dto.ShortItem, 0), fmt.Errorf("failed to parse data from DBRow: %w", err)
 	}
 	defer rows.Close()
