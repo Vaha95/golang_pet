@@ -10,6 +10,7 @@ import (
 	"github.com/Vaha95/golang_pet/internal/handler"
 	"github.com/Vaha95/golang_pet/internal/model/DTO"
 	"github.com/Vaha95/golang_pet/internal/service/delete_url"
+	"github.com/labstack/echo-contrib/v5/pprof"
 	"github.com/labstack/echo/v5"
 	"go.uber.org/zap"
 
@@ -42,6 +43,8 @@ func main() {
 	}
 
 	e := echo.New()
+
+	pprof.Register(e)
 
 	e.GET(`/:id`, handler.GetURLHandler(cfg, l))
 	e.POST(`/`, handler.GetSaveURLHandler(cfg, l))
