@@ -7,7 +7,7 @@ const (
 	// SHORTEN denotes the action of creating a short URL.
 	SHORTEN = "shorten"
 	// FOLLOW denotes the action of following a short URL to its target.
-	FOLLOW  = "follow"
+	FOLLOW = "follow"
 )
 
 // BaseAuditItem is the payload sent to the audit log on URL operations.
