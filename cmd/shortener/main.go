@@ -9,7 +9,7 @@ import (
 	"github.com/Vaha95/golang_pet/internal/config/db"
 	"github.com/Vaha95/golang_pet/internal/handler"
 	"github.com/Vaha95/golang_pet/internal/model/DTO"
-	"github.com/Vaha95/golang_pet/internal/service/delete_url"
+	deleteurl "github.com/Vaha95/golang_pet/internal/service/delete_url"
 	"github.com/labstack/echo-contrib/v5/pprof"
 	"github.com/labstack/echo/v5"
 	"go.uber.org/zap"
