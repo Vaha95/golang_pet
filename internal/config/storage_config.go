@@ -35,5 +35,11 @@ func (cfg *StorageConfig) GetUserId() *int {
 }
 
 func (cfg *StorageConfig) SetUserId(userId int) {
-	cfg.UserData = &UserData{userId}
+	if cfg.UserData == nil {
+		cfg.UserData = &UserData{userId}
+		
+		return
+	}
+
+	cfg.UserData.userId = userId
 }
