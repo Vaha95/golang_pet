@@ -10,7 +10,7 @@ import (
 	"testing"
 
 	"github.com/Vaha95/golang_pet/internal/config"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
@@ -53,8 +53,8 @@ func sendDefShortenRequest(t *testing.T, url string) (*http.Response, *httptest.
 	w := httptest.NewRecorder()
 	cfg := config.Config{
 		ListenHost: `localhost:8080`,
-		URLHost: `http://localhost:8080`,
-		FilePath: ``,
+		URLHost:    `http://localhost:8080`,
+		FilePath:   ``,
 	}
 	stCfg := config.StorageConfig{
 		Config: cfg,

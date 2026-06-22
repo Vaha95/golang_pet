@@ -8,10 +8,11 @@ import (
 
 	"github.com/Vaha95/golang_pet/internal/config"
 	"github.com/Vaha95/golang_pet/internal/repository"
-	"github.com/Vaha95/golang_pet/internal/service/save_url"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	
+	saveurl "github.com/Vaha95/golang_pet/internal/service/save_url"
 )
 
 func TestGetUrl(t *testing.T) {
@@ -19,8 +20,7 @@ func TestGetUrl(t *testing.T) {
 
 	cfg := config.Config{
 		ListenHost: `localhost:8080`,
-		URLHost: `http://localhost:8080`,
-		FilePath: ``,
+		URLHost:    `http://localhost:8080`,
 	}
 	stCfg := config.StorageConfig{
 		Config: cfg,
@@ -35,9 +35,9 @@ func TestGetUrl(t *testing.T) {
 	h := GetURLHandler(stCfg, l)
 
 	c := echo.New().NewContext(request, w)
-	c.SetParamNames("id")
-	c.SetParamValues(id)
-
+	c.SetPathValues(echo.PathValues{
+		{Name: "id", Value: id},
+	})
 	h(c)
 
 	res := w.Result()

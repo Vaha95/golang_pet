@@ -8,7 +8,9 @@ import (
 	"github.com/Vaha95/golang_pet/internal/config"
 	"github.com/Vaha95/golang_pet/internal/config/db"
 	"github.com/Vaha95/golang_pet/internal/handler"
-	"github.com/labstack/echo/v4"
+	"github.com/Vaha95/golang_pet/internal/model/DTO"
+	"github.com/Vaha95/golang_pet/internal/service/delete_url"
+	"github.com/labstack/echo/v5"
 	"go.uber.org/zap"
 
 	mv "github.com/Vaha95/golang_pet/internal/infrastructure/middleware"
@@ -44,10 +46,16 @@ func main() {
 	e.GET(`/:id`, handler.GetURLHandler(cfg, l))
 	e.POST(`/`, handler.GetSaveURLHandler(cfg, l))
 	e.POST(`/api/shorten`, handler.GetSaveURLShortenHandler(cfg, l))
-	e.GET(`/ping`, handler.GetPingDBHandler(dbService))
+	e.GET(`/ping`, handler.GetPingDBHandler(dbService, l))
 	e.POST(`/api/shorten/batch`, handler.GetSaveURLBatchHandler(cfg, l))
+	e.GET(`/api/user/urls`, handler.GetURLByUserHandler(cfg, l))
 
-	err = mv.AddMiddlewares(e, l)
+    deleteCh := make(chan DTO.DeleteBatch)
+	listener := deleteurl.GetDeleteUrlListener(cfg, deleteCh, l)
+	go listener()
+	e.DELETE(`/api/user/urls`, handler.GetDeleteURLHandler(cfg, deleteCh, l))
+
+	err = mv.AddMiddlewares(cfg, e, l)
 	if err != nil {
 		log.Fatal(
 			fmt.Errorf("can`t start Web server: %w", err).Error(),

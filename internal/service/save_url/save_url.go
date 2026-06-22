@@ -40,22 +40,22 @@ func SaveURL(cfg config.StorageConfig, inputURL string) (string, error) {
 func setToStorage(cfg config.StorageConfig, parsedURL string) (string, error) {
 	for i := 0; i < 10; i++ {
 		id := GenerateHash()
-		strategy := strategy.GetStrategy(cfg)
-		if err := strategy.Save(id, parsedURL, nil); err != nil {
+		strg := strategy.GetStrategy(cfg)
+		if err := strg.Save(id, parsedURL, nil, cfg.GetUserId()); err != nil {
 			if errors.Is(err, repository.ErrorShortURLKeyAlreadyExists) {
 				continue
 			}
-			
+
+			if errors.Is(err, strategy.ErrorUrlAlreadyExists) {
+				id, err = strg.GetShortByURL(parsedURL)
+				if err != nil {
+					return id, fmt.Errorf("failed to find short by URL: %w", err)
+				}
+
+				return id, fmt.Errorf("failed to save new URL: %w", ErrorUrlAlreadyExists)
+			}
+
 			return "", fmt.Errorf("failed to save the short URL: %w", err)
-		}
-
-		dbId, err := strategy.GetShortByURL(parsedURL)
-		if err != nil {
-			return "", fmt.Errorf("failed to find short by URL: %w", err)
-		}
-
-		if dbId != id {
-			return dbId, fmt.Errorf("failed to find short by URL: %w", ErrorUrlAlreadyExists)
 		}
 
 		return id, nil

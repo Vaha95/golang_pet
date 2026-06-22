@@ -10,6 +10,7 @@ import (
 var ErrorShortURLKeyAlreadyExists = errors.New("short URL key already exists")
 var ErrorShortURLKeyNotFound = errors.New("short URL key not found")
 var ErrorURLNotFound = errors.New("short URL not found")
+var ErrorURLByUserNotFound = errors.New("short URL by user not found")
 
 func SetURL(cfg config.Config, key string, val string) (err error) {
 	data, err := ReadFileStore(cfg)

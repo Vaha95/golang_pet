@@ -2,14 +2,16 @@ package repository
 
 import (
 	"github.com/Vaha95/golang_pet/internal/config"
-	"github.com/Vaha95/golang_pet/internal/model/DTO/save_url"
+	"github.com/Vaha95/golang_pet/internal/model/DTO"
 )
 
 type URLStrategy interface {
-	Save(short string, url string, extId *string) error
-	SaveBatch(data []DTO.BatchItem, GenerateHash func() string) error
-	Get(key string) (string, error)
+	Save(short string, url string, extId *string, userId *int) error
+	SaveBatch(data []DTO.BatchItem, userId *int, GenerateHash func() string) error
+	Get(key string) (*DTO.ShortItem, error)
 	GetShortByURL(url string) (string, error)
+	GetByUser(userId *int) ([]DTO.ShortItem, error)
+	DeleteBatch(DTO.DeleteBatch) (error)
 }
 
 func GetStrategy(cfg config.StorageConfig) URLStrategy {
