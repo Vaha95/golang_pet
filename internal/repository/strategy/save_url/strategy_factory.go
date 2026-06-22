@@ -11,7 +11,7 @@ type URLStrategy interface {
 	Get(key string) (*DTO.ShortItem, error)
 	GetShortByURL(url string) (string, error)
 	GetByUser(userId *int) ([]DTO.ShortItem, error)
-	DeleteBatch(DTO.DeleteBatch) (error)
+	DeleteBatch(DTO.DeleteBatch) error
 }
 
 func GetStrategy(cfg config.StorageConfig) URLStrategy {

@@ -21,7 +21,7 @@ func SaveURL(cfg config.StorageConfig, inputURL string) (string, error) {
 
 	id, err := setToStorage(cfg, parsedURL.String())
 	if err != nil {
-		if (errors.Is(err, ErrorUrlAlreadyExists)) {
+		if errors.Is(err, ErrorUrlAlreadyExists) {
 			id, joinErr := url.JoinPath(cfg.Config.URLHost, id)
 			if joinErr != nil {
 				return "", joinErr

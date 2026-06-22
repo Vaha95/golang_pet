@@ -50,7 +50,7 @@ func main() {
 	e.POST(`/api/shorten/batch`, handler.GetSaveURLBatchHandler(cfg, l))
 	e.GET(`/api/user/urls`, handler.GetURLByUserHandler(cfg, l))
 
-    deleteCh := make(chan DTO.DeleteBatch)
+	deleteCh := make(chan DTO.DeleteBatch)
 	listener := deleteurl.GetDeleteUrlListener(cfg, deleteCh, l)
 	go listener()
 	e.DELETE(`/api/user/urls`, handler.GetDeleteURLHandler(cfg, deleteCh, l))

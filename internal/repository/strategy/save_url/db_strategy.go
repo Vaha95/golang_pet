@@ -16,7 +16,9 @@ type DBStrategy struct {
 	db  *sql.DB
 	cfg config.Config
 }
+
 var ErrorUrlAlreadyExists = errors.New("short URL already exists")
+var ErrorUrlNotFound = errors.New("URL not found")
 
 func (s DBStrategy) Save(short string, url string, extId *string, userId *int) error {
 	query := "INSERT INTO url_short (url, short, ext_id, created_by_user) VALUES ($1,$2,$3,$4) ON CONFLICT (url) WHERE (deleted_at IS NULL) DO NOTHING RETURNING short"
@@ -27,7 +29,7 @@ func (s DBStrategy) Save(short string, url string, extId *string, userId *int) e
 		if errors.Is(err, sql.ErrNoRows) {
 			return fmt.Errorf("failed to find short by URL: %w", ErrorUrlAlreadyExists)
 		}
-		
+
 		return err
 	}
 
@@ -65,14 +67,18 @@ func (s DBStrategy) SaveBatch(data []dto.BatchItem, userId *int, generateHash fu
 }
 
 func (s DBStrategy) Get(short string) (*DTO.ShortItem, error) {
-	sql := "SELECT url, deleted_at FROM url_short where short=$1 LIMIT 1"
+	stmt := "SELECT url, deleted_at FROM url_short where short=$1 LIMIT 1"
 
-	row := s.db.QueryRow(sql, short)
+	row := s.db.QueryRow(stmt, short)
 
 	var data DTO.ShortItem
 	err := row.Scan(&data.URL, &data.DeletedAt)
-	if err != nil || data.URL == "" {
-		return nil, fmt.Errorf("failed to parse URL from DBRow: %w", err)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, fmt.Errorf("failed to find URL: %w", ErrorUrlNotFound)
+		}
+
+		return nil, fmt.Errorf("failed to find URL: %w", err)
 	}
 
 	return &data, nil
@@ -116,14 +122,14 @@ func (s DBStrategy) GetByUser(userId *int) ([]DTO.ShortItem, error) {
 	return data, nil
 }
 
-func (s DBStrategy) DeleteBatch(data DTO.DeleteBatch) (error) {
+func (s DBStrategy) DeleteBatch(data DTO.DeleteBatch) error {
 	batch := data.Shorts
 
 	valueStrings := make([]string, 0, len(batch))
-	valueArgs := make([]interface{}, 0, len(batch) * 2)
+	valueArgs := make([]interface{}, 0, len(batch)*2)
 
 	for k, short := range batch {
-		i := (k+1) * 2
+		i := (k + 1) * 2
 		valueStrings = append(valueStrings, fmt.Sprintf("short = $%d AND created_by_user=$%d AND deleted_at IS NULL", i-1, i))
 		valueArgs = append(valueArgs, short, data.UserId)
 	}

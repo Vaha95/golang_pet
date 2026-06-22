@@ -13,27 +13,27 @@ import (
 )
 
 func initMigrations(db *sql.DB) error {
-    driver, err := postgres.WithInstance(db, &postgres.Config{})
+	driver, err := postgres.WithInstance(db, &postgres.Config{})
 	if err != nil {
 		return err
 	}
-	
+
 	path, err := migrationPath()
 	if err != nil {
 		return err
 	}
 
-    m, err := migrate.NewWithDatabaseInstance(
-        "file://" + path,
-        "postgres",
+	m, err := migrate.NewWithDatabaseInstance(
+		"file://"+path,
+		"postgres",
 		driver,
 	)
-	
-	if (err != nil) {
+
+	if err != nil {
 		return err
 	}
 
-    err = m.Up() 
+	err = m.Up()
 	if err != nil && !errors.Is(err, migrate.ErrNoChange) {
 		return err
 	}
@@ -43,8 +43,8 @@ func initMigrations(db *sql.DB) error {
 
 func migrationPath() (string, error) {
 	_, b, _, _ := runtime.Caller(0)
-	basepath := filepath.Dir(b) 
+	basepath := filepath.Dir(b)
 	basepath, _ = url.JoinPath(basepath, "migrations")
-	
+
 	return basepath, nil
 }

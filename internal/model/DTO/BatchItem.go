@@ -2,6 +2,6 @@ package DTO
 
 type BatchItem struct {
 	ExtId string
-	URL string
+	URL   string
 	Short string
 }

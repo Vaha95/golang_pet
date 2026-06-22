@@ -104,7 +104,7 @@ func (s FileStrategy) GetByUser(userId *int) ([]DTO.ShortItem, error) {
 	return make([]DTO.ShortItem, 0), fmt.Errorf("%w: %d", repository.ErrorURLByUserNotFound, userId)
 }
 
-func (s FileStrategy) DeleteBatch(inp DTO.DeleteBatch) (error) {
+func (s FileStrategy) DeleteBatch(inp DTO.DeleteBatch) error {
 	batch := inp.Shorts
 	data, err := repository.ReadFileStore(s.cfg)
 	if err != nil {

@@ -12,17 +12,17 @@ import (
 )
 
 const (
-	MainDir = `./var`
-	FilenameDirPrefix = MainDir + `/storage/data`;
-	Filename = `urls-data.json`
+	MainDir           = `./var`
+	FilenameDirPrefix = MainDir + `/storage/data`
+	Filename          = `urls-data.json`
 )
 
-func createFileIfNotExist (cfg config.Config) error {
+func createFileIfNotExist(cfg config.Config) error {
 	fullPath := getFullPath(cfg)
 	dir := filepath.Dir(fullPath)
 
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		err = os.MkdirAll(dir, 0755) 
+		err = os.MkdirAll(dir, 0755)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -45,7 +45,7 @@ func createFileIfNotExist (cfg config.Config) error {
 	return nil
 }
 
-func getFullPath (cfg config.Config) string {
+func getFullPath(cfg config.Config) string {
 	filePath := cfg.FilePath
 	if filePath == `` {
 		filePath = filepath.Join(FilenameDirPrefix, "/", Filename)
@@ -59,7 +59,7 @@ func createNewFile(fullPath string) (*os.File, error) {
 	if err != nil {
 		return nil, fmt.Errorf("can`t storage file: %w", err)
 	}
-	
+
 	defValue, err := json.Marshal(map[string]string{})
 	if err != nil {
 		return nil, fmt.Errorf("can`t storage file: %w", err)

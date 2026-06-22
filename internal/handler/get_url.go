@@ -21,7 +21,7 @@ func GetURLHandler(cfg config.StorageConfig, l *zap.SugaredLogger) func(c *echo.
 		s := strategy.GetStrategy(cfg)
 		data, err := s.Get(id)
 		if err != nil {
-			if errors.Is(err, repository.ErrorShortURLKeyNotFound) {
+			if errors.Is(err, repository.ErrorShortURLKeyNotFound) || errors.Is(err, strategy.ErrorUrlNotFound) {
 				return c.JSON(http.StatusNotFound, "URL is not found")
 			}
 
@@ -31,7 +31,7 @@ func GetURLHandler(cfg config.StorageConfig, l *zap.SugaredLogger) func(c *echo.
 		}
 
 		if data == nil {
-			return c.JSON(http.StatusNotFound, err.Error())	
+			return c.JSON(http.StatusNotFound, err.Error())
 		}
 		if data.URL == "" {
 			l.Errorf("Url is empty")
@@ -40,9 +40,9 @@ func GetURLHandler(cfg config.StorageConfig, l *zap.SugaredLogger) func(c *echo.
 		}
 
 		audit.PushToAudit(cfg.Config, DTO.CrateBaseAuditItemFollow(data.URL, cfg.GetUserId()))
-		
+
 		if data.DeletedAt != nil {
-			return c.JSON(http.StatusGone, data.URL)			
+			return c.JSON(http.StatusGone, data.URL)
 		}
 
 		return c.Redirect(http.StatusTemporaryRedirect, data.URL)

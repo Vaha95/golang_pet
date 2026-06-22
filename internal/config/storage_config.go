@@ -5,10 +5,10 @@ import (
 )
 
 type StorageConfig struct {
-	DBService DBService
+	DBService   DBService
 	IsDBAllowed bool
-	Config Config
-	UserData *UserData
+	Config      Config
+	UserData    *UserData
 }
 
 type DBService interface {
@@ -19,10 +19,10 @@ type DBService interface {
 
 func GetConfig(dbService DBService, isDBAllowed bool, mainConfig Config) StorageConfig {
 	return StorageConfig{
-		DBService: dbService,
+		DBService:   dbService,
 		IsDBAllowed: isDBAllowed,
-		Config: mainConfig,
-		UserData: &UserData{},
+		Config:      mainConfig,
+		UserData:    &UserData{},
 	}
 }
 

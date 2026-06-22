@@ -14,14 +14,14 @@ import (
 
 const (
 	SECRET_KEY = "SECRET_KEY"
-	TOKEN_EXP = time.Hour * 3
+	TOKEN_EXP  = time.Hour * 3
 	COOKIE_KEY = "auth_token"
 	COOKIE_EXP = time.Hour * 24
 )
 
 type Claims struct {
-    jwt.RegisteredClaims
-    UserID int
+	jwt.RegisteredClaims
+	UserID int
 }
 
 func addAuthMiddleware(cfg config.StorageConfig, e *echo.Echo, l *zap.SugaredLogger) {
@@ -47,7 +47,7 @@ func addAuthMiddleware(cfg config.StorageConfig, e *echo.Echo, l *zap.SugaredLog
 					}
 					writeCookie(c, token)
 				}
-				cfg.SetUserId(userId)				
+				cfg.SetUserId(userId)
 			}
 
 			next(c)
@@ -58,39 +58,39 @@ func addAuthMiddleware(cfg config.StorageConfig, e *echo.Echo, l *zap.SugaredLog
 }
 
 func buildJWTString(userId int) (string, error) {
-    token := jwt.NewWithClaims(jwt.SigningMethodHS256, Claims {
-        RegisteredClaims: jwt.RegisteredClaims{
-            ExpiresAt: jwt.NewNumericDate(time.Now().Add(TOKEN_EXP)),
-        },
-        UserID: userId,
-    })
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, Claims{
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(TOKEN_EXP)),
+		},
+		UserID: userId,
+	})
 
-    tokenString, err := token.SignedString([]byte(SECRET_KEY))
-    if err != nil {
-        return "", err
-    }
+	tokenString, err := token.SignedString([]byte(SECRET_KEY))
+	if err != nil {
+		return "", err
+	}
 
-    return tokenString, nil
+	return tokenString, nil
 }
 
 func getUserID(tokenString string) int {
-    claims := &Claims{}
-    token, err := jwt.ParseWithClaims(tokenString, claims,
-    func(t *jwt.Token) (interface{}, error) {
-        if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-            return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
-        }
-        return []byte(SECRET_KEY), nil
-    })
-    if err != nil {
-        return -1
-    }
+	claims := &Claims{}
+	token, err := jwt.ParseWithClaims(tokenString, claims,
+		func(t *jwt.Token) (interface{}, error) {
+			if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
+			}
+			return []byte(SECRET_KEY), nil
+		})
+	if err != nil {
+		return -1
+	}
 
-    if !token.Valid {
-        return -1
-    }
+	if !token.Valid {
+		return -1
+	}
 
-    return claims.UserID
+	return claims.UserID
 }
 
 func writeCookie(c *echo.Context, token string) {

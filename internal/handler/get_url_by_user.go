@@ -36,7 +36,7 @@ func GetURLByUserHandler(cfg config.StorageConfig, l *zap.SugaredLogger) func(c 
 			}
 
 			resp = append(resp, APIResponse{
-				URL: v.URL,
+				URL:   v.URL,
 				Short: short,
 			})
 		}
