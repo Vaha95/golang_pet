@@ -22,7 +22,10 @@ func TestSaveURLBatch_Success(t *testing.T) {
 	assert.Equal(t, http.StatusCreated, res.StatusCode)
 
 	var resp []map[string]string
-	json.NewDecoder(res.Body).Decode(&resp)
+	err := json.NewDecoder(res.Body).Decode(&resp)
+	if err != nil {
+		t.Error(err)
+	}
 
 	assert.Len(t, resp, 2)
 	assert.Equal(t, "abc", resp[0]["correlation_id"])

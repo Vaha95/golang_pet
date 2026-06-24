@@ -5,12 +5,18 @@ import (
 	"fmt"
 	"math/rand"
 	"net/url"
-	"strings"
+	"sync"
 	"time"
 
 	"github.com/Vaha95/golang_pet/internal/config"
 	"github.com/Vaha95/golang_pet/internal/repository"
 	strategy "github.com/Vaha95/golang_pet/internal/repository/strategy/save_url"
+)
+
+var (
+	hashChars = []byte("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789")
+	hashRand  = rand.New(rand.NewSource(time.Now().UnixNano()))
+	hashMu    sync.Mutex
 )
 
 // SaveURL validates and persists a single URL, returning the full short URL path.
@@ -67,15 +73,12 @@ func setToStorage(cfg config.StorageConfig, parsedURL string) (string, error) {
 
 // GenerateHash produces a random 8-character alphanumeric short URL key.
 func GenerateHash() string {
-	rand.New((rand.NewSource(time.Now().UnixNano())))
-	chars := []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
-		"abcdefghijklmnopqrstuvwxyz" +
-		"0123456789")
-	length := 8
-	var b strings.Builder
-	for i := 0; i < length; i++ {
-		b.WriteRune(chars[rand.Intn(len(chars))])
+	hashMu.Lock()
+	buf := make([]byte, 8)
+	for i := range buf {
+		buf[i] = hashChars[hashRand.Intn(len(hashChars))]
 	}
+	hashMu.Unlock()
 
-	return b.String()
+	return string(buf)
 }

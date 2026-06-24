@@ -2,7 +2,6 @@ package repository
 
 import (
 	"fmt"
-	"slices"
 
 	"github.com/Vaha95/golang_pet/internal/config"
 	"github.com/Vaha95/golang_pet/internal/model/DTO"
@@ -93,7 +92,7 @@ func (s FileStrategy) GetByUser(userId *int) ([]DTO.ShortItem, error) {
 		return make([]DTO.ShortItem, 0), fmt.Errorf("%w: %d", repository.ErrorURLByUserNotFound, userId)
 	}
 
-	result := make([]DTO.ShortItem, len(data))
+	result := make([]DTO.ShortItem, 0, len(data))
 	for short, u := range data {
 		result = append(result, DTO.ShortItem{Short: short, URL: u})
 	}
@@ -102,7 +101,7 @@ func (s FileStrategy) GetByUser(userId *int) ([]DTO.ShortItem, error) {
 		return result, nil
 	}
 
-	return make([]DTO.ShortItem, 0), fmt.Errorf("%w: %d", repository.ErrorURLByUserNotFound, userId)
+	return result, fmt.Errorf("%w: %d", repository.ErrorURLByUserNotFound, userId)
 }
 
 func (s FileStrategy) DeleteBatch(inp DTO.DeleteBatch) error {
@@ -115,8 +114,12 @@ func (s FileStrategy) DeleteBatch(inp DTO.DeleteBatch) error {
 		return fmt.Errorf("%w", repository.ErrorURLNotFound)
 	}
 
+	set := make(map[string]struct{}, len(batch))
+	for _, v := range batch {
+		set[v] = struct{}{}
+	}
 	for short := range data {
-		if slices.Contains(batch, short) {
+		if _, ok := set[short]; ok {
 			delete(data, short)
 		}
 	}

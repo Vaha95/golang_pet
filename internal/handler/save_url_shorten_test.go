@@ -8,8 +8,10 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"testing"
+	"time"
 
 	"github.com/Vaha95/golang_pet/internal/config"
+	"github.com/Vaha95/golang_pet/internal/model/DTO"
 	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -27,7 +29,7 @@ type APIResponse struct {
 }
 
 func TestSaveURLShorten(t *testing.T) {
-	res, w := sendDefShortenRequest(t, "http://bgfnfgmnhg.com")
+	res, w, auditCh := sendDefShortenRequest(t, "http://bgfnfgmnhg.com")
 
 	assert.Equal(t, 201, res.StatusCode)
 	assert.Equal(t, echo.MIMEApplicationJSON, w.Header().Get(echo.HeaderContentType))
@@ -36,15 +38,23 @@ func TestSaveURLShorten(t *testing.T) {
 	json.Unmarshal(w.Body.Bytes(), &resData)
 	_, err := url.ParseRequestURI(resData.Result)
 	require.NoError(t, err)
+
+	select {
+		case auditItem := <-auditCh:
+			assert.Equal(t, "http://bgfnfgmnhg.com", auditItem.URL)
+			assert.Equal(t, DTO.FOLLOW, auditItem.Action)
+		case <-time.After(100 * time.Millisecond):
+			t.Fatal("Timed out waiting for audit item")
+	}
 }
 
 func TestInvalidURLShorten(t *testing.T) {
-	res, _ := sendDefShortenRequest(t, "this is not URL")
+	res, _, _ := sendDefShortenRequest(t, "this is not URL")
 
 	assert.Equal(t, 400, res.StatusCode)
 }
 
-func sendDefShortenRequest(t *testing.T, url string) (*http.Response, *httptest.ResponseRecorder) {
+func sendDefShortenRequest(t *testing.T, url string) (*http.Response, *httptest.ResponseRecorder, chan DTO.BaseAuditItem) {
 	data, err := json.Marshal(APIReqiest{url})
 	require.NoError(t, err)
 	request := httptest.NewRequest(http.MethodPost, "http://localhost:8080/api/shorten", bytes.NewReader(data))
@@ -60,15 +70,15 @@ func sendDefShortenRequest(t *testing.T, url string) (*http.Response, *httptest.
 		Config: cfg,
 	}
 	l, _ := getLogger()
-	h := GetSaveURLShortenHandler(stCfg, l)
+	auditCh := make(chan DTO.BaseAuditItem, 1)
+	h := GetSaveURLShortenHandler(stCfg, l, auditCh)
 
 	c := echo.New().NewContext(request, w)
 	h(c)
 
 	res := w.Result()
-	defer res.Body.Close()
 
-	return res, w
+	return res, w, auditCh
 }
 
 func getLogger() (*zap.SugaredLogger, error) {

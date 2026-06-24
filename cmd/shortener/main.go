@@ -9,6 +9,7 @@ import (
 	"github.com/Vaha95/golang_pet/internal/config/db"
 	"github.com/Vaha95/golang_pet/internal/handler"
 	"github.com/Vaha95/golang_pet/internal/model/DTO"
+	"github.com/Vaha95/golang_pet/internal/service/audit"
 	deleteurl "github.com/Vaha95/golang_pet/internal/service/delete_url"
 	"github.com/labstack/echo-contrib/v5/pprof"
 	"github.com/labstack/echo/v5"
@@ -46,9 +47,12 @@ func main() {
 
 	pprof.Register(e)
 
-	e.GET(`/:id`, handler.GetURLHandler(cfg, l))
-	e.POST(`/`, handler.GetSaveURLHandler(cfg, l))
-	e.POST(`/api/shorten`, handler.GetSaveURLShortenHandler(cfg, l))
+	auditWorker := audit.CreateAuditWorker(cfg.Config)
+	auditWorker.Run()
+
+	e.GET(`/:id`, handler.GetURLHandler(cfg, l, auditWorker.AuditCh))
+	e.POST(`/`, handler.GetSaveURLHandler(cfg, l, auditWorker.AuditCh))
+	e.POST(`/api/shorten`, handler.GetSaveURLShortenHandler(cfg, l, auditWorker.AuditCh))
 	e.GET(`/ping`, handler.GetPingDBHandler(dbService, l))
 	e.POST(`/api/shorten/batch`, handler.GetSaveURLBatchHandler(cfg, l))
 	e.GET(`/api/user/urls`, handler.GetURLByUserHandler(cfg, l))

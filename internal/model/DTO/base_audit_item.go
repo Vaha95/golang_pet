@@ -15,25 +15,25 @@ type BaseAuditItem struct {
 	URL    string `json:"url"`
 	Action string `json:"action"`
 	UserId *int   `json:"user_id"`
-	Ts     string `json:"ts"`
+	Ts     int64  `json:"ts"`
 }
 
-// CrateBaseAuditItemShorten creates an audit item for a shorten action.
-func CrateBaseAuditItemShorten(url string, userId *int) BaseAuditItem {
+// CreateBaseAuditItemShorten creates an audit item for a shorten action.
+func CreateBaseAuditItemShorten(url string, userId *int) BaseAuditItem {
 	return BaseAuditItem{
 		URL:    url,
 		Action: SHORTEN,
 		UserId: userId,
-		Ts:     time.Now().String(),
+		Ts:     time.Now().Unix(),
 	}
 }
 
-// CrateBaseAuditItemFollow creates an audit item for a follow action.
-func CrateBaseAuditItemFollow(url string, userId *int) BaseAuditItem {
+// CreateBaseAuditItemFollow creates an audit item for a follow action.
+func CreateBaseAuditItemFollow(url string, userId *int) BaseAuditItem {
 	return BaseAuditItem{
 		URL:    url,
 		Action: FOLLOW,
 		UserId: userId,
-		Ts:     time.Now().String(),
+		Ts:     time.Now().Unix(),
 	}
 }

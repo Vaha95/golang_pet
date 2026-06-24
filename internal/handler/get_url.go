@@ -7,7 +7,6 @@ import (
 	"github.com/Vaha95/golang_pet/internal/config"
 	"github.com/Vaha95/golang_pet/internal/model/DTO"
 	"github.com/Vaha95/golang_pet/internal/repository"
-	"github.com/Vaha95/golang_pet/internal/service/audit"
 	"github.com/labstack/echo/v5"
 	"go.uber.org/zap"
 
@@ -15,7 +14,7 @@ import (
 )
 
 // GetURLHandler returns an Echo handler that resolves a short URL and redirects to the original.
-func GetURLHandler(cfg config.StorageConfig, l *zap.SugaredLogger) func(c *echo.Context) error {
+func GetURLHandler(cfg config.StorageConfig, l *zap.SugaredLogger, auditCh chan DTO.BaseAuditItem) func(c *echo.Context) error {
 	return func(c *echo.Context) error {
 		id := c.Param("id")
 
@@ -40,7 +39,7 @@ func GetURLHandler(cfg config.StorageConfig, l *zap.SugaredLogger) func(c *echo.
 			return c.NoContent(http.StatusInternalServerError)
 		}
 
-		audit.PushToAudit(cfg.Config, DTO.CrateBaseAuditItemFollow(data.URL, cfg.GetUserId()))
+		auditCh <- DTO.CreateBaseAuditItemFollow(data.URL, cfg.GetUserId())
 
 		if data.DeletedAt != nil {
 			return c.JSON(http.StatusGone, data.URL)
