@@ -16,6 +16,8 @@ var wgPool = &sync.Pool{New: func() interface{} {
 	return new(sync.WaitGroup)
 }}
 
+var fileMu sync.Mutex
+
 // AuditWorker receives audit events on a channel and persists them
 // to a local file and/or a remote HTTP endpoint configured in cfg.
 type AuditWorker struct {
@@ -79,7 +81,9 @@ func pushToFile(cfg config.Config, data string, wg *sync.WaitGroup) {
 	}
 	defer f.Close()
 
+	fileMu.Lock()
 	_, err = f.WriteString(data + "\n")
+	fileMu.Unlock()
 	if err != nil {
 		log.Error(err)
 	}
