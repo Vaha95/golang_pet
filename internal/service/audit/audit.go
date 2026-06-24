@@ -21,7 +21,7 @@ var fileMu sync.Mutex
 // AuditWorker receives audit events on a channel and persists them
 // to a local file and/or a remote HTTP endpoint configured in cfg.
 type AuditWorker struct {
-	cfg config.Config
+	cfg     config.Config
 	AuditCh chan DTO.BaseAuditItem
 }
 
@@ -29,7 +29,7 @@ type AuditWorker struct {
 // and a buffered channel for receiving audit events.
 func CreateAuditWorker(cfg config.Config) AuditWorker {
 	return AuditWorker{
-		cfg: cfg,
+		cfg:     cfg,
 		AuditCh: make(chan DTO.BaseAuditItem),
 	}
 }
@@ -45,7 +45,7 @@ func (aw *AuditWorker) listen() {
 		msg := <-aw.AuditCh
 		PushToAudit(aw.cfg, msg)
 	}
-	
+
 }
 
 // PushToAudit sends an audit event to both a local file and a remote HTTP endpoint.

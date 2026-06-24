@@ -29,11 +29,11 @@ func TestSaveURL(t *testing.T) {
 	require.NoError(t, err)
 
 	select {
-		case auditItem := <-auditCh:
-			assert.Equal(t, "http://vfdfbdfbd.com", auditItem.URL)
-			assert.Equal(t, DTO.FOLLOW, auditItem.Action)
-		case <-time.After(100 * time.Millisecond):
-			t.Fatal("Timed out waiting for audit item")
+	case auditItem := <-auditCh:
+		assert.Equal(t, "http://vfdfbdfbd.com", auditItem.URL)
+		assert.Equal(t, DTO.FOLLOW, auditItem.Action)
+	case <-time.After(100 * time.Millisecond):
+		t.Fatal("Timed out waiting for audit item")
 	}
 }
 
