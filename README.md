@@ -42,3 +42,20 @@ git fetch template && git checkout template/v2 .github
 - **Clean Architecture**
 - **Hexagonal Architecture**
 - **Layered Architecture**
+
+## Pprof
+ 
+Снять текущие метрики:
+
+```
+curl -s "http://127.0.0.1:8080/debug/pprof/heap" > profiles/base.pprof
+```
+```
+curl -s "http://127.0.0.1:8080/debug/pprof/heap" > profiles/result.pprof
+```
+
+Получить результат изменений:
+
+```
+go tool pprof -top -diff_base=profiles/base.pprof profiles/result.pprof
+```

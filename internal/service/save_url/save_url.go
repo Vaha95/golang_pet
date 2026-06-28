@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"net/url"
-	"strings"
+	"sync"
 	"time"
 
 	"github.com/Vaha95/golang_pet/internal/config"
@@ -13,6 +13,13 @@ import (
 	strategy "github.com/Vaha95/golang_pet/internal/repository/strategy/save_url"
 )
 
+var (
+	hashChars = []byte("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789")
+	hashRand  = rand.New(rand.NewSource(time.Now().UnixNano()))
+	hashMu    sync.Mutex
+)
+
+// SaveURL validates and persists a single URL, returning the full short URL path.
 func SaveURL(cfg config.StorageConfig, inputURL string) (string, error) {
 	parsedURL, err := url.ParseRequestURI(inputURL)
 	if err != nil {
@@ -21,7 +28,7 @@ func SaveURL(cfg config.StorageConfig, inputURL string) (string, error) {
 
 	id, err := setToStorage(cfg, parsedURL.String())
 	if err != nil {
-		if (errors.Is(err, ErrorUrlAlreadyExists)) {
+		if errors.Is(err, ErrorUrlAlreadyExists) {
 			id, joinErr := url.JoinPath(cfg.Config.URLHost, id)
 			if joinErr != nil {
 				return "", joinErr
@@ -64,16 +71,14 @@ func setToStorage(cfg config.StorageConfig, parsedURL string) (string, error) {
 	return "", errors.New("ID generate is impossible")
 }
 
+// GenerateHash produces a random 8-character alphanumeric short URL key.
 func GenerateHash() string {
-	rand.New((rand.NewSource(time.Now().UnixNano())))
-	chars := []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZ" +
-		"abcdefghijklmnopqrstuvwxyz" +
-		"0123456789")
-	length := 8
-	var b strings.Builder
-	for i := 0; i < length; i++ {
-		b.WriteRune(chars[rand.Intn(len(chars))])
+	hashMu.Lock()
+	buf := make([]byte, 8)
+	for i := range buf {
+		buf[i] = hashChars[hashRand.Intn(len(hashChars))]
 	}
+	hashMu.Unlock()
 
-	return b.String()
+	return string(buf)
 }

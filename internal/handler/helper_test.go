@@ -9,16 +9,16 @@ import (
 )
 
 func TestMain(m *testing.M) {
-    exitCode := m.Run()
-	
+	exitCode := m.Run()
+
 	clearFileCache()
 
-    os.Exit(exitCode)
+	os.Exit(exitCode)
 }
 
 func clearFileCache() {
 	dirPath := repository.MainDir
-	
+
 	err := os.RemoveAll(dirPath)
 	if err != nil {
 		log.Fatalf("Error deleting directory: %v", err)

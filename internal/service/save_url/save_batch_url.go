@@ -8,6 +8,7 @@ import (
 	strategy "github.com/Vaha95/golang_pet/internal/repository/strategy/save_url"
 )
 
+// SaveBatchURL creates short URLs for a batch of input URLs.
 func SaveBatchURL(cfg config.StorageConfig, data []DTO.BatchItem) error {
 	strategy := strategy.GetStrategy(cfg)
 	err := strategy.SaveBatch(data, cfg.GetUserId(), GenerateHash)

@@ -6,13 +6,15 @@ import (
 	"net/http"
 
 	"github.com/Vaha95/golang_pet/internal/config"
+	"github.com/Vaha95/golang_pet/internal/model/DTO"
 	"github.com/labstack/echo/v5"
 	"go.uber.org/zap"
 
 	saveurl "github.com/Vaha95/golang_pet/internal/service/save_url"
 )
 
-func GetSaveURLHandler(cfg config.StorageConfig, l *zap.SugaredLogger) func(c *echo.Context) error {
+// GetSaveURLHandler returns an Echo handler that saves a raw URL from the request body and returns the short path.
+func GetSaveURLHandler(cfg config.StorageConfig, l *zap.SugaredLogger, auditCh chan DTO.BaseAuditItem) func(c *echo.Context) error {
 	return func(c *echo.Context) error {
 		req := c.Request()
 
@@ -35,6 +37,7 @@ func GetSaveURLHandler(cfg config.StorageConfig, l *zap.SugaredLogger) func(c *e
 				return c.JSON(http.StatusBadRequest, err.Error())
 			}
 		}
+		auditCh <- DTO.CreateBaseAuditItemFollow(inputURL, cfg.GetUserId())
 
 		return c.String(http.StatusCreated, path)
 	}

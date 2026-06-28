@@ -10,6 +10,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// GetDeleteURLHandler returns an Echo handler that queues short URLs for async deletion.
 func GetDeleteURLHandler(cfg config.StorageConfig, ch chan DTO.DeleteBatch, l *zap.SugaredLogger) func(c *echo.Context) error {
 	return func(c *echo.Context) error {
 		var req []string

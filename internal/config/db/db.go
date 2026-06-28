@@ -11,14 +11,16 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	_ "github.com/jackc/pgx/v5/stdlib" // регистрация драйвера pgx
 )
+
+// ErrorDBDsnEmpty indicates that the database DSN was not provided.
 var ErrorDBDsnEmpty = errors.New("DB dsn is empty")
 
 // Config содержит параметры подключения к PostgreSQL
 type Config struct {
 	DSN string
 
-	MaxOpenConns int // максимальное количество открытых соединений
-	MaxIdleConns int // максимальное количество простаивающих соединений
+	MaxOpenConns    int           // максимальное количество открытых соединений
+	MaxIdleConns    int           // максимальное количество простаивающих соединений
 	ConnMaxLifetime time.Duration // максимальное время жизни соединения
 }
 
@@ -36,7 +38,7 @@ func connect(cfg Config) (*sql.DB, error) {
 func сonnectToDB(cfg Config) (*sql.DB, error) {
 	dsn := cfg.DSN
 	if dsn == "" {
-		return nil, fmt.Errorf("DB dsn is empty: %w", ErrorDBDsnEmpty)		
+		return nil, fmt.Errorf("DB dsn is empty: %w", ErrorDBDsnEmpty)
 	}
 
 	db, err := sql.Open("pgx", dsn)
@@ -56,20 +58,21 @@ func setSettings(s *Service) {
 	s.db.Exec("SET LOCAL synchronous_commit TO OFF")
 }
 
+// InitDb connects to the database, runs migrations, and returns a ready Service.
 func InitDb(mainConfig config.Config) (*Service, error) {
 	cfg := Config{
-		DSN: mainConfig.DbDSN,
-		MaxOpenConns: 10,
-		MaxIdleConns: 5,
+		DSN:             mainConfig.DbDSN,
+		MaxOpenConns:    10,
+		MaxIdleConns:    5,
 		ConnMaxLifetime: time.Hour,
 	}
 
 	db, err := connect(cfg)
-	if ; err != nil {
+	if err != nil {
 		return nil, fmt.Errorf("Failed to connect to database: %w", err)
 	}
-	
-    err = initMigrations(db)
+
+	err = initMigrations(db)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to migrate: %v", err)
 	}

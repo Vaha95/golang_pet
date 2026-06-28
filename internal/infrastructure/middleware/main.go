@@ -10,6 +10,7 @@ import (
 
 var ErrorZapLoggerInitialize = errors.New("init logger is failed")
 
+// AddMiddlewares registers all project middlewares on the Echo instance.
 func AddMiddlewares(cfg config.StorageConfig, e *echo.Echo, l *zap.SugaredLogger) error {
 	addAuthMiddleware(cfg, e, l)
 	addEncodeMiddleware(e)

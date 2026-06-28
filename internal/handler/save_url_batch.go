@@ -11,6 +11,7 @@ import (
 	saveurl "github.com/Vaha95/golang_pet/internal/service/save_url"
 )
 
+// GetSaveURLBatchHandler returns an Echo handler that saves multiple URLs in a single request.
 func GetSaveURLBatchHandler(cfg config.StorageConfig, l *zap.SugaredLogger) func(c *echo.Context) error {
 	return func(c *echo.Context) error {
 		type APIReqiest struct {
