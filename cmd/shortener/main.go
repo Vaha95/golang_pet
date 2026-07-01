@@ -10,6 +10,7 @@ import (
 	"github.com/Vaha95/golang_pet/internal/handler"
 	"github.com/Vaha95/golang_pet/internal/model/DTO"
 	"github.com/Vaha95/golang_pet/internal/service/audit"
+	"github.com/Vaha95/golang_pet/internal/service/build"
 	deleteurl "github.com/Vaha95/golang_pet/internal/service/delete_url"
 	"github.com/labstack/echo-contrib/v5/pprof"
 	"github.com/labstack/echo/v5"
@@ -19,6 +20,9 @@ import (
 )
 
 func main() {
+	build := build.BuildInfo{}
+	build.Print()
+	
 	mainConfig := config.GetMainConfig()
 
 	dbService, err := db.InitDb(mainConfig)
