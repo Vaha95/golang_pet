@@ -22,7 +22,7 @@ import (
 func main() {
 	build := build.BuildInfo{}
 	build.Print()
-	
+
 	mainConfig := config.GetMainConfig()
 
 	dbService, err := db.InitDb(mainConfig)
