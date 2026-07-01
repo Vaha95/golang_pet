@@ -5,29 +5,28 @@ import (
 	"strings"
 )
 
+var tmp string = `
+	Build version: <buildVersion>
+	Build date: <buildDate>
+	Build commit: <buildCommit>
+`
 type BuildInfo struct {
 	buildVersion string
 	buildDate    string
 	buildCommit  string
 }
 
+func Create() BuildInfo {
+	return BuildInfo{
+		buildVersion: "N/A",
+		buildDate: "N/A",
+		buildCommit: "N/A",
+	}
+}
+
 func (b BuildInfo) Print() {
-	template := `
-		Build version: <buildVersion>
-		Build date: <buildDate>
-		Build commit: <buildCommit>
-	`
-
-	if b.buildVersion == "" {
-		b.buildVersion = "N/A"
-	}
-	if b.buildDate == "" {
-		b.buildDate = "N/A"
-	}
-	if b.buildCommit == "" {
-		b.buildCommit = "N/A"
-	}
-
+	template := tmp
+	
 	template = strings.Replace(template, "<buildVersion>", b.buildVersion, 1)
 	template = strings.Replace(template, "<buildDate>", b.buildDate, 1)
 	template = strings.Replace(template, "<buildCommit>", b.buildCommit, 1)

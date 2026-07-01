@@ -20,7 +20,7 @@ import (
 )
 
 func main() {
-	build := build.BuildInfo{}
+	build := build.Create()
 	build.Print()
 
 	mainConfig := config.GetMainConfig()
