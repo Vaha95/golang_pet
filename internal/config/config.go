@@ -21,27 +21,6 @@ type ConfigENV struct {
 
 // ConfigFlag holds configuration read from command-line flags.
 type ConfigFlag struct {
-	ListenHost       string
-	URLHost          string
-	FilePath         string
-	DbDSN            string
-	AuditFilePath    string
-	AuditURL         string
-	EnableHttps      bool
-	ConfigFilePath   string
-}
-
-// ConfigFile holds configuration read from a JSON file (lowest priority).
-type ConfigFile struct {
-	ListenHost    string `json:"server_address"`
-	URLHost       string `json:"base_url"`
-	FilePath      string `json:"file_storage_path"`
-	DbDSN         string `json:"database_dsn"`
-	EnableHttps   *bool  `json:"enable_https"`
-}
-
-// Config holds merged application configuration (ENV takes precedence over flags).
-type Config struct {
 	ListenHost     string
 	URLHost        string
 	FilePath       string
@@ -49,6 +28,27 @@ type Config struct {
 	AuditFilePath  string
 	AuditURL       string
 	EnableHttps    bool
+	ConfigFilePath string
+}
+
+// ConfigFile holds configuration read from a JSON file (lowest priority).
+type ConfigFile struct {
+	ListenHost  string `json:"server_address"`
+	URLHost     string `json:"base_url"`
+	FilePath    string `json:"file_storage_path"`
+	DbDSN       string `json:"database_dsn"`
+	EnableHttps *bool  `json:"enable_https"`
+}
+
+// Config holds merged application configuration (ENV takes precedence over flags).
+type Config struct {
+	ListenHost    string
+	URLHost       string
+	FilePath      string
+	DbDSN         string
+	AuditFilePath string
+	AuditURL      string
+	EnableHttps   bool
 }
 
 func GetConfigENV() ConfigENV {
@@ -82,14 +82,14 @@ func GetConfigFlag() ConfigFlag {
 	flag.Parse()
 
 	return ConfigFlag{
-		ListenHost:      *listenHost,
-		URLHost:         *urlHost,
-		FilePath:        *filePath,
-		DbDSN:           *dsn,
-		AuditFilePath:   *auditFile,
-		AuditURL:        *auditURL,
-		EnableHttps:     *enableHttps,
-		ConfigFilePath:  *configPath,
+		ListenHost:     *listenHost,
+		URLHost:        *urlHost,
+		FilePath:       *filePath,
+		DbDSN:          *dsn,
+		AuditFilePath:  *auditFile,
+		AuditURL:       *auditURL,
+		EnableHttps:    *enableHttps,
+		ConfigFilePath: *configPath,
 	}
 }
 
@@ -111,7 +111,7 @@ func GetMainConfig() Config {
 	env := GetConfigENV()
 	flagCfg := GetConfigFlag()
 
-	configFilePath := fallback(env.ConfigFilePath, flagCfg.ConfigFilePath)
+	configFilePath := fallback(env.ConfigFilePath, flagCfg.ConfigFilePath, nil)
 	configFileData := getConfigFile(configFilePath)
 
 	enableHttps := flagCfg.EnableHttps
@@ -120,12 +120,12 @@ func GetMainConfig() Config {
 	}
 
 	return Config{
-		ListenHost:    fallback(env.ListenHost, flagCfg.ListenHost, configFileData.ListenHost),
-		URLHost:       fallback(env.URLHost, flagCfg.URLHost, configFileData.URLHost),
-		FilePath:      fallback(env.FilePath, flagCfg.FilePath, configFileData.FilePath),
-		DbDSN:         fallback(env.DbDSN, flagCfg.DbDSN, configFileData.DbDSN),
-		AuditFilePath: fallback(env.AuditFilePath, flagCfg.AuditFilePath),
-		AuditURL:      fallback(env.AuditURL, flagCfg.AuditURL),
+		ListenHost:    fallback(env.ListenHost, flagCfg.ListenHost, &(configFileData.ListenHost)),
+		URLHost:       fallback(env.URLHost, flagCfg.URLHost, &(configFileData.URLHost)),
+		FilePath:      fallback(env.FilePath, flagCfg.FilePath, &(configFileData.FilePath)),
+		DbDSN:         fallback(env.DbDSN, flagCfg.DbDSN, &(configFileData.DbDSN)),
+		AuditFilePath: fallback(env.AuditFilePath, flagCfg.AuditFilePath, nil),
+		AuditURL:      fallback(env.AuditURL, flagCfg.AuditURL, nil),
 		EnableHttps:   enableHttps,
 	}
 }
@@ -137,6 +137,6 @@ func fallback(envVal string, flagVal string, fileVal *string) string {
 	if flagVal != "" {
 		return flagVal
 	}
-	
+
 	return *fileVal
 }
