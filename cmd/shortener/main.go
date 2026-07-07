@@ -95,13 +95,13 @@ func serveStartDefault(e *echo.Echo, host string) {
 		log.Fatal(
 			fmt.Errorf("can`t start Web server: %w", err).Error(),
 		)
-	}	
+	}
 }
 
 func serveStartTLS(e *echo.Echo, l *zap.SugaredLogger) {
 	s := &http.Server{
 		Addr:    ":443",
-		Handler: e, 
+		Handler: e,
 		TLSConfig: &tls.Config{
 			MinVersion: tls.VersionTLS12,
 		},
