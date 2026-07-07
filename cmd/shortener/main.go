@@ -1,9 +1,12 @@
 package main
 
 import (
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"log"
+	"net/http"
+	"time"
 
 	"github.com/Vaha95/golang_pet/internal/config"
 	"github.com/Vaha95/golang_pet/internal/config/db"
@@ -73,13 +76,43 @@ func main() {
 		)
 	}
 
-	err = e.Start(cfg.Config.ListenHost)
+	serveStart(e, l, cfg.Config)
+}
+
+func serveStart(e *echo.Echo, l *zap.SugaredLogger, cfg config.Config) {
+	if cfg.EnableHttps {
+		serveStartTLS(e, l)
+
+		return
+	}
+
+	serveStartDefault(e, cfg.ListenHost)
+}
+
+func serveStartDefault(e *echo.Echo, host string) {
+	err := e.Start(host)
 	if err != nil {
 		log.Fatal(
 			fmt.Errorf("can`t start Web server: %w", err).Error(),
 		)
+	}	
+}
+
+func serveStartTLS(e *echo.Echo, l *zap.SugaredLogger) {
+	s := &http.Server{
+		Addr:    ":443",
+		Handler: e, 
+		TLSConfig: &tls.Config{
+			MinVersion: tls.VersionTLS12,
+		},
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
 	}
 
+	// Start usingListenAndServeTLS
+	if err := s.ListenAndServeTLS("cert.pem", "key.pem"); err != nil && err != http.ErrServerClosed {
+		l.Fatal(err)
+	}
 }
 
 func getLogger() (*zap.SugaredLogger, error) {

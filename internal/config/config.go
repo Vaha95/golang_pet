@@ -3,6 +3,7 @@ package config
 import (
 	"flag"
 	"os"
+	"strconv"
 )
 
 // Config holds application configuration read from environment variables or flags.
@@ -13,6 +14,7 @@ type Config struct {
 	DbDSN         string
 	AuditFilePath string
 	AuditURL      string
+	EnableHttps   bool
 }
 
 func GetMainConfig() Config {
@@ -22,6 +24,7 @@ func GetMainConfig() Config {
 	dsnENV := os.Getenv("DATABASE_DSN")
 	auditFileENV := os.Getenv("AUDIT_FILE")
 	auditURLENV := os.Getenv("AUDIT_URL")
+	enableHttpsENV := os.Getenv("ENABLE_HTTPS")
 
 	listenHostFlag := flag.String("a", `localhost:8080`, "Host for app")
 	urlHostFlag := flag.String("b", `http://localhost:8080`, "Host for url")
@@ -29,6 +32,7 @@ func GetMainConfig() Config {
 	dsnFlag := flag.String("d", ``, "Database dsn")
 	auditFileFlag := flag.String("audit-file", ``, "Audit file path")
 	auditURLFlag := flag.String("audit-url", ``, "Audit URL path")
+	enableHttpsFlag := flag.Bool("s", false, "Enable Https")
 	flag.Parse()
 
 	listenHost := listenHostENV
@@ -61,6 +65,11 @@ func GetMainConfig() Config {
 		auditURL = *auditURLFlag
 	}
 
+	enableHttps, err := strconv.ParseBool(enableHttpsENV)
+	if err != nil {
+		enableHttps = *enableHttpsFlag
+	}
+
 	return Config{
 		ListenHost:    listenHost,
 		URLHost:       urlHost,
@@ -68,5 +77,6 @@ func GetMainConfig() Config {
 		DbDSN:         dsn,
 		AuditFilePath: auditFile,
 		AuditURL:      auditURL,
+		EnableHttps:   enableHttps,
 	}
 }
