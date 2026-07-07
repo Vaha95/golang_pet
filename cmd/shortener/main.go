@@ -1,11 +1,14 @@
 package main
 
 import (
+	"context"
 	"crypto/tls"
 	"errors"
 	"fmt"
 	"log"
 	"net/http"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/Vaha95/golang_pet/internal/config"
@@ -76,7 +79,11 @@ func main() {
 		)
 	}
 
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+	defer stop()
+
 	serveStart(e, l, cfg.Config)
+	<-ctx.Done()
 }
 
 func serveStart(e *echo.Echo, l *zap.SugaredLogger, cfg config.Config) {
