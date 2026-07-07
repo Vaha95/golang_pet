@@ -6,7 +6,29 @@ import (
 	"strconv"
 )
 
-// Config holds application configuration read from environment variables or flags.
+// ConfigENV holds configuration read from environment variables.
+type ConfigENV struct {
+	ListenHost    string
+	URLHost       string
+	FilePath      string
+	DbDSN         string
+	AuditFilePath string
+	AuditURL      string
+	EnableHttps   *bool // nil if not set or invalid
+}
+
+// ConfigFlag holds configuration read from command-line flags.
+type ConfigFlag struct {
+	ListenHost    string
+	URLHost       string
+	FilePath      string
+	DbDSN         string
+	AuditFilePath string
+	AuditURL      string
+	EnableHttps   bool
+}
+
+// Config holds merged application configuration (ENV takes precedence over flags).
 type Config struct {
 	ListenHost    string
 	URLHost       string
@@ -17,66 +39,68 @@ type Config struct {
 	EnableHttps   bool
 }
 
-func GetMainConfig() Config {
-	listenHostENV := os.Getenv("SERVER_ADDRESS")
-	urlHostENV := os.Getenv("BASE_URL")
-	filePathENV := os.Getenv("FILE_STORAGE_PATH")
-	dsnENV := os.Getenv("DATABASE_DSN")
-	auditFileENV := os.Getenv("AUDIT_FILE")
-	auditURLENV := os.Getenv("AUDIT_URL")
-	enableHttpsENV := os.Getenv("ENABLE_HTTPS")
+func GetConfigENV() ConfigENV {
+	enableHttpsRaw := os.Getenv("ENABLE_HTTPS")
+	enableHttps := (*bool)(nil)
+	if parsed, err := strconv.ParseBool(enableHttpsRaw); err == nil {
+		enableHttps = &parsed
+	}
 
-	listenHostFlag := flag.String("a", `localhost:8080`, "Host for app")
-	urlHostFlag := flag.String("b", `http://localhost:8080`, "Host for url")
-	filePathFlag := flag.String("f", ``, "Storage file path")
-	dsnFlag := flag.String("d", ``, "Database dsn")
-	auditFileFlag := flag.String("audit-file", ``, "Audit file path")
-	auditURLFlag := flag.String("audit-url", ``, "Audit URL path")
-	enableHttpsFlag := flag.Bool("s", false, "Enable Https")
+	return ConfigENV{
+		ListenHost:    os.Getenv("SERVER_ADDRESS"),
+		URLHost:       os.Getenv("BASE_URL"),
+		FilePath:      os.Getenv("FILE_STORAGE_PATH"),
+		DbDSN:         os.Getenv("DATABASE_DSN"),
+		AuditFilePath: os.Getenv("AUDIT_FILE"),
+		AuditURL:      os.Getenv("AUDIT_URL"),
+		EnableHttps:   enableHttps,
+	}
+}
+
+func GetConfigFlag() ConfigFlag {
+	listenHost := flag.String("a", `localhost:8080`, "Host for app")
+	urlHost := flag.String("b", `http://localhost:8080`, "Host for url")
+	filePath := flag.String("f", ``, "Storage file path")
+	dsn := flag.String("d", ``, "Database dsn")
+	auditFile := flag.String("audit-file", ``, "Audit file path")
+	auditURL := flag.String("audit-url", ``, "Audit URL path")
+	enableHttps := flag.Bool("s", false, "Enable Https")
 	flag.Parse()
 
-	listenHost := listenHostENV
-	if listenHost == "" {
-		listenHost = *listenHostFlag
+	return ConfigFlag{
+		ListenHost:    *listenHost,
+		URLHost:       *urlHost,
+		FilePath:      *filePath,
+		DbDSN:         *dsn,
+		AuditFilePath: *auditFile,
+		AuditURL:      *auditURL,
+		EnableHttps:   *enableHttps,
 	}
+}
 
-	urlHost := urlHostENV
-	if urlHost == "" {
-		urlHost = *urlHostFlag
-	}
+func GetMainConfig() Config {
+	env := GetConfigENV()
+	flagCfg := GetConfigFlag()
 
-	filePath := filePathENV
-	if filePath == "" {
-		filePath = *filePathFlag
-	}
-
-	dsn := dsnENV
-	if dsn == "" {
-		dsn = *dsnFlag
-	}
-
-	auditFile := auditFileENV
-	if auditFile == "" {
-		auditFile = *auditFileFlag
-	}
-
-	auditURL := auditURLENV
-	if auditURL == "" {
-		auditURL = *auditURLFlag
-	}
-
-	enableHttps, err := strconv.ParseBool(enableHttpsENV)
-	if err != nil {
-		enableHttps = *enableHttpsFlag
+	enableHttps := flagCfg.EnableHttps
+	if env.EnableHttps != nil {
+		enableHttps = *env.EnableHttps
 	}
 
 	return Config{
-		ListenHost:    listenHost,
-		URLHost:       urlHost,
-		FilePath:      filePath,
-		DbDSN:         dsn,
-		AuditFilePath: auditFile,
-		AuditURL:      auditURL,
+		ListenHost:    fallback(env.ListenHost, flagCfg.ListenHost),
+		URLHost:       fallback(env.URLHost, flagCfg.URLHost),
+		FilePath:      fallback(env.FilePath, flagCfg.FilePath),
+		DbDSN:         fallback(env.DbDSN, flagCfg.DbDSN),
+		AuditFilePath: fallback(env.AuditFilePath, flagCfg.AuditFilePath),
+		AuditURL:      fallback(env.AuditURL, flagCfg.AuditURL),
 		EnableHttps:   enableHttps,
 	}
+}
+
+func fallback(envVal string, flagVal string) string {
+	if envVal != "" {
+		return envVal
+	}
+	return flagVal
 }
