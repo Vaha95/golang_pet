@@ -82,32 +82,43 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	defer stop()
 
-	serveStart(e, l, cfg.Config)
+	srvCh := make(chan *http.Server, 1)
+	go func() {
+		srvCh <- serveStart(e, l, cfg.Config)
+	}()
+	srv := <-srvCh
 	<-ctx.Done()
+	srv.Shutdown(ctx)
 }
 
-func serveStart(e *echo.Echo, l *zap.SugaredLogger, cfg config.Config) {
+func serveStart(e *echo.Echo, l *zap.SugaredLogger, cfg config.Config) *http.Server {
 	if cfg.EnableHttps {
-		serveStartTLS(e, l)
-
-		return
+		return serveStartTLS(e, l, cfg)
 	}
 
-	serveStartDefault(e, cfg.ListenHost)
+	return serveStartDefault(e, cfg)
 }
 
-func serveStartDefault(e *echo.Echo, host string) {
-	err := e.Start(host)
-	if err != nil {
-		log.Fatal(
-			fmt.Errorf("can`t start Web server: %w", err).Error(),
-		)
+func serveStartDefault(e *echo.Echo, cfg config.Config) *http.Server {
+	srv := &http.Server{
+		Addr:    cfg.ListenHost,
+		Handler: e,
 	}
+
+	go func() {
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatal(
+				fmt.Errorf("can`t start Web server: %w", err).Error(),
+			)
+		}
+	}()
+
+	return srv
 }
 
-func serveStartTLS(e *echo.Echo, l *zap.SugaredLogger) {
-	s := &http.Server{
-		Addr:    ":443",
+func serveStartTLS(e *echo.Echo, l *zap.SugaredLogger, cfg config.Config) *http.Server {
+	srv := &http.Server{
+		Addr:    cfg.TLSAddress,
 		Handler: e,
 		TLSConfig: &tls.Config{
 			MinVersion: tls.VersionTLS12,
@@ -116,10 +127,13 @@ func serveStartTLS(e *echo.Echo, l *zap.SugaredLogger) {
 		WriteTimeout: 10 * time.Second,
 	}
 
-	// Start usingListenAndServeTLS
-	if err := s.ListenAndServeTLS("cert.pem", "key.pem"); err != nil && err != http.ErrServerClosed {
-		l.Fatal(err)
-	}
+	go func() {
+		if err := srv.ListenAndServeTLS(cfg.CertFile, cfg.KeyFile); err != nil && err != http.ErrServerClosed {
+			l.Fatal(err.Error())
+		}
+	}()
+
+	return srv
 }
 
 func getLogger() (*zap.SugaredLogger, error) {

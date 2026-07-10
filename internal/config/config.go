@@ -7,6 +7,13 @@ import (
 	"strconv"
 )
 
+// TLS configuration constants for server.
+const (
+	TLS_ADDRESS = ":443"
+	CERT_FILE = "cert.pem"
+	KEY_FILE = "key.pem"
+)
+
 // ConfigENV holds configuration read from environment variables.
 type ConfigENV struct {
 	ListenHost     string
@@ -17,6 +24,9 @@ type ConfigENV struct {
 	AuditURL       string
 	EnableHttps    *bool // nil if not set or invalid
 	ConfigFilePath string
+	TLSAddress 	   string
+	CertFile 	   string
+	KeyFile 	   string
 }
 
 // ConfigFlag holds configuration read from command-line flags.
@@ -49,23 +59,41 @@ type Config struct {
 	AuditFilePath string
 	AuditURL      string
 	EnableHttps   bool
+	TLSAddress 	  string
+	CertFile 	  string
+	KeyFile 	  string
 }
 
 func GetConfigENV() ConfigENV {
-	enableHttpsRaw := os.Getenv("ENABLE_HTTPS")
+	enableHttpsRaw, _ := os.LookupEnv("ENABLE_HTTPS")
 	enableHttps := (*bool)(nil)
 	if parsed, err := strconv.ParseBool(enableHttpsRaw); err == nil {
 		enableHttps = &parsed
 	}
 
+	listenHost, _ := os.LookupEnv("SERVER_ADDRESS")
+	urlHost, _ := os.LookupEnv("BASE_URL")
+	filePath, _ := os.LookupEnv("FILE_STORAGE_PATH")
+	dbDSN, _ := os.LookupEnv("DATABASE_DSN")
+	auditFilePath, _ := os.LookupEnv("AUDIT_FILE")
+	auditURL, _ := os.LookupEnv("AUDIT_URL")
+	configFilePath, _ := os.LookupEnv("CONFIG")
+	tlsAddress, _ := os.LookupEnv("TLS_ADDRESS")
+	certFile, _ := os.LookupEnv("CERT_FILE")
+	keyFile, _ := os.LookupEnv("KEY_FILE")
+
 	return ConfigENV{
-		ListenHost:    os.Getenv("SERVER_ADDRESS"),
-		URLHost:       os.Getenv("BASE_URL"),
-		FilePath:      os.Getenv("FILE_STORAGE_PATH"),
-		DbDSN:         os.Getenv("DATABASE_DSN"),
-		AuditFilePath: os.Getenv("AUDIT_FILE"),
-		AuditURL:      os.Getenv("AUDIT_URL"),
-		EnableHttps:   enableHttps,
+		ListenHost:     listenHost,
+		URLHost:        urlHost,
+		FilePath:       filePath,
+		DbDSN:          dbDSN,
+		AuditFilePath:  auditFilePath,
+		AuditURL:       auditURL,
+		ConfigFilePath: configFilePath,
+		EnableHttps:    enableHttps,
+		TLSAddress:     tlsAddress,
+		CertFile:       certFile,
+		KeyFile:        keyFile,
 	}
 }
 
@@ -111,7 +139,7 @@ func GetMainConfig() Config {
 	env := GetConfigENV()
 	flagCfg := GetConfigFlag()
 
-	configFilePath := fallback(env.ConfigFilePath, flagCfg.ConfigFilePath, nil)
+	configFilePath := coalesce(env.ConfigFilePath, flagCfg.ConfigFilePath, nil)
 	configFileData := getConfigFile(configFilePath)
 
 	enableHttps := flagCfg.EnableHttps
@@ -120,23 +148,29 @@ func GetMainConfig() Config {
 	}
 
 	return Config{
-		ListenHost:    fallback(env.ListenHost, flagCfg.ListenHost, &(configFileData.ListenHost)),
-		URLHost:       fallback(env.URLHost, flagCfg.URLHost, &(configFileData.URLHost)),
-		FilePath:      fallback(env.FilePath, flagCfg.FilePath, &(configFileData.FilePath)),
-		DbDSN:         fallback(env.DbDSN, flagCfg.DbDSN, &(configFileData.DbDSN)),
-		AuditFilePath: fallback(env.AuditFilePath, flagCfg.AuditFilePath, nil),
-		AuditURL:      fallback(env.AuditURL, flagCfg.AuditURL, nil),
+		ListenHost:    coalesce(flagCfg.ListenHost, env.ListenHost, &(configFileData.ListenHost)),
+		URLHost:       coalesce(flagCfg.URLHost, env.URLHost, &(configFileData.URLHost)),
+		FilePath:      coalesce(flagCfg.FilePath, env.FilePath, &(configFileData.FilePath)),
+		DbDSN:         coalesce(flagCfg.DbDSN, env.DbDSN, &(configFileData.DbDSN)),
+		AuditFilePath: coalesce(flagCfg.AuditFilePath, env.AuditFilePath, nil),
+		AuditURL:      coalesce(flagCfg.AuditURL, env.AuditURL, nil),
 		EnableHttps:   enableHttps,
+		TLSAddress:    coalesce(env.TLSAddress, TLS_ADDRESS, nil),
+		CertFile:      coalesce(env.CertFile, CERT_FILE, nil),
+		KeyFile:       coalesce(env.KeyFile, KEY_FILE, nil),
 	}
 }
 
-func fallback(envVal string, flagVal string, fileVal *string) string {
-	if envVal != "" {
-		return envVal
+func coalesce(firstVal string, secondVal string, thirdVal *string) string {
+	if firstVal != "" {
+		return firstVal
 	}
-	if flagVal != "" {
-		return flagVal
+	if secondVal != "" {
+		return secondVal
+	}
+	if thirdVal != nil {
+		return *thirdVal
 	}
 
-	return *fileVal
+	return ""
 }
