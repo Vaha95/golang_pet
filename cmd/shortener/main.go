@@ -1,9 +1,15 @@
 package main
 
 import (
+	"context"
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"log"
+	"net/http"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/Vaha95/golang_pet/internal/config"
 	"github.com/Vaha95/golang_pet/internal/config/db"
@@ -73,13 +79,61 @@ func main() {
 		)
 	}
 
-	err = e.Start(cfg.Config.ListenHost)
-	if err != nil {
-		log.Fatal(
-			fmt.Errorf("can`t start Web server: %w", err).Error(),
-		)
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+	defer stop()
+
+	srvCh := make(chan *http.Server, 1)
+	go func() {
+		srvCh <- serveStart(e, l, cfg.Config)
+	}()
+	srv := <-srvCh
+	<-ctx.Done()
+	srv.Shutdown(ctx)
+}
+
+func serveStart(e *echo.Echo, l *zap.SugaredLogger, cfg config.Config) *http.Server {
+	if cfg.EnableHttps {
+		return serveStartTLS(e, l, cfg)
 	}
 
+	return serveStartDefault(e, cfg)
+}
+
+func serveStartDefault(e *echo.Echo, cfg config.Config) *http.Server {
+	srv := &http.Server{
+		Addr:    cfg.ListenHost,
+		Handler: e,
+	}
+
+	go func() {
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatal(
+				fmt.Errorf("can`t start Web server: %w", err).Error(),
+			)
+		}
+	}()
+
+	return srv
+}
+
+func serveStartTLS(e *echo.Echo, l *zap.SugaredLogger, cfg config.Config) *http.Server {
+	srv := &http.Server{
+		Addr:    cfg.TLSAddress,
+		Handler: e,
+		TLSConfig: &tls.Config{
+			MinVersion: tls.VersionTLS12,
+		},
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 10 * time.Second,
+	}
+
+	go func() {
+		if err := srv.ListenAndServeTLS(cfg.CertFile, cfg.KeyFile); err != nil && err != http.ErrServerClosed {
+			l.Fatal(err.Error())
+		}
+	}()
+
+	return srv
 }
 
 func getLogger() (*zap.SugaredLogger, error) {

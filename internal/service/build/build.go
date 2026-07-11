@@ -2,14 +2,7 @@ package build
 
 import (
 	"fmt"
-	"strings"
 )
-
-var tmp string = `
-	Build version: <buildVersion>
-	Build date: <buildDate>
-	Build commit: <buildCommit>
-`
 
 type BuildInfo struct {
 	buildVersion string
@@ -26,11 +19,9 @@ func Create() BuildInfo {
 }
 
 func (b BuildInfo) Print() {
-	template := tmp
-
-	template = strings.Replace(template, "<buildVersion>", b.buildVersion, 1)
-	template = strings.Replace(template, "<buildDate>", b.buildDate, 1)
-	template = strings.Replace(template, "<buildCommit>", b.buildCommit, 1)
-
-	fmt.Println(template)
+	fmt.Printf(`
+		Build version: %s
+		Build date: %s
+		Build commit: %s
+	`, b.buildVersion, b.buildDate, b.buildCommit)
 }
