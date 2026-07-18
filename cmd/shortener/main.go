@@ -66,6 +66,7 @@ func main() {
 	e.GET(`/ping`, handler.GetPingDBHandler(dbService, l))
 	e.POST(`/api/shorten/batch`, handler.GetSaveURLBatchHandler(cfg, l))
 	e.GET(`/api/user/urls`, handler.GetURLByUserHandler(cfg, l))
+	e.GET(`/api/imternal/stats`, handler.GetStatsHandler(cfg, l))
 
 	deleteCh := make(chan DTO.DeleteBatch)
 	listener := deleteurl.GetDeleteUrlListener(cfg, deleteCh, l)
