@@ -6,13 +6,16 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"os/signal"
 	"syscall"
 	"time"
 
+	"github.com/Vaha95/golang_pet/api/shortenerpb"
 	"github.com/Vaha95/golang_pet/internal/config"
 	"github.com/Vaha95/golang_pet/internal/config/db"
+	"github.com/Vaha95/golang_pet/internal/grpcserver"
 	"github.com/Vaha95/golang_pet/internal/handler"
 	"github.com/Vaha95/golang_pet/internal/model/DTO"
 	"github.com/Vaha95/golang_pet/internal/service/audit"
@@ -21,6 +24,7 @@ import (
 	"github.com/labstack/echo-contrib/v5/pprof"
 	"github.com/labstack/echo/v5"
 	"go.uber.org/zap"
+	"google.golang.org/grpc"
 
 	mv "github.com/Vaha95/golang_pet/internal/infrastructure/middleware"
 )
@@ -83,13 +87,37 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	defer stop()
 
+	grpcSvc := startGRPC(cfg, auditWorker.AuditCh, l)
+
 	srvCh := make(chan *http.Server, 1)
 	go func() {
 		srvCh <- serveStart(e, l, cfg.Config)
 	}()
 	srv := <-srvCh
 	<-ctx.Done()
+	if grpcSvc != nil {
+		grpcSvc.GracefulStop()
+	}
 	srv.Shutdown(ctx)
+}
+
+func startGRPC(cfg config.StorageConfig, auditCh chan DTO.BaseAuditItem, l *zap.SugaredLogger) *grpc.Server {
+	grpcListener, err := net.Listen("tcp", cfg.Config.GRPCPort)
+	if err != nil {
+		l.Errorf("can`t listen on gRPC port %s: %v", cfg.Config.GRPCPort, err)
+		return nil
+	}
+
+	grpcSvc := grpc.NewServer()
+	shortenerpb.RegisterShortenerServiceServer(grpcSvc, grpcserver.NewServer(cfg, auditCh))
+	go func() {
+		if err := grpcSvc.Serve(grpcListener); err != nil {
+			l.Errorf("gRPC server error: %v", err)
+		}
+	}()
+	l.Infof("gRPC server listening on %s", cfg.Config.GRPCPort)
+
+	return grpcSvc
 }
 
 func serveStart(e *echo.Echo, l *zap.SugaredLogger, cfg config.Config) *http.Server {

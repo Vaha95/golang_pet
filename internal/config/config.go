@@ -10,8 +10,9 @@ import (
 // TLS configuration constants for server.
 const (
 	TLS_ADDRESS = ":443"
-	CERT_FILE = "cert.pem"
-	KEY_FILE = "key.pem"
+	CERT_FILE   = "cert.pem"
+	KEY_FILE    = "key.pem"
+	GRPC_PORT   = ":50051"
 )
 
 // ConfigENV holds configuration read from environment variables.
@@ -24,10 +25,11 @@ type ConfigENV struct {
 	AuditURL       string
 	EnableHttps    *bool // nil if not set or invalid
 	ConfigFilePath string
-	TLSAddress    	string
-	CertFile 	   string
-	KeyFile 	   string
+	TLSAddress     string
+	CertFile       string
+	KeyFile        string
 	TrustedSubnet  string
+	GRPCPort       string
 }
 
 // ConfigFlag holds configuration read from command-line flags.
@@ -41,16 +43,17 @@ type ConfigFlag struct {
 	EnableHttps    bool
 	ConfigFilePath string
 	TrustedSubnet  string
+	GRPCPort       string
 }
 
 // ConfigFile holds configuration read from a JSON file (lowest priority).
 type ConfigFile struct {
-	ListenHost      string `json:"server_address"`
-	URLHost         string `json:"base_url"`
-	FilePath        string `json:"file_storage_path"`
-	DbDSN           string `json:"database_dsn"`
-	EnableHttps     *bool  `json:"enable_https"`
-	TrustedSubnet   string `json:"trusted_subnet"`
+	ListenHost    string `json:"server_address"`
+	URLHost       string `json:"base_url"`
+	FilePath      string `json:"file_storage_path"`
+	DbDSN         string `json:"database_dsn"`
+	EnableHttps   *bool  `json:"enable_https"`
+	TrustedSubnet string `json:"trusted_subnet"`
 }
 
 // Config holds merged application configuration (ENV takes precedence over flags).
@@ -63,9 +66,10 @@ type Config struct {
 	AuditURL      string
 	EnableHttps   bool
 	TLSAddress    string
-	CertFile 	   string
-	KeyFile 	   string
+	CertFile      string
+	KeyFile       string
 	TrustedSubnet string
+	GRPCPort      string
 }
 
 func GetConfigENV() ConfigENV {
@@ -86,6 +90,7 @@ func GetConfigENV() ConfigENV {
 	certFile, _ := os.LookupEnv("CERT_FILE")
 	keyFile, _ := os.LookupEnv("KEY_FILE")
 	trustedSubnet, _ := os.LookupEnv("TRUSTED_SUBNET")
+	grpcPort, _ := os.LookupEnv("GRPC_PORT")
 
 	return ConfigENV{
 		ListenHost:     listenHost,
@@ -100,6 +105,7 @@ func GetConfigENV() ConfigENV {
 		CertFile:       certFile,
 		KeyFile:        keyFile,
 		TrustedSubnet:  trustedSubnet,
+		GRPCPort:       grpcPort,
 	}
 }
 
@@ -114,6 +120,7 @@ func GetConfigFlag() ConfigFlag {
 	configPath := flag.String("c", ``, "Config file path (json)")
 	flag.StringVar(configPath, "config", ``, "Config file path (json)")
 	trustedSubnet := flag.String("t", "", "Trusted subnet")
+	grpcPort := flag.String("g", GRPC_PORT, "gRPC server address")
 	flag.Parse()
 
 	return ConfigFlag{
@@ -126,6 +133,7 @@ func GetConfigFlag() ConfigFlag {
 		EnableHttps:    *enableHttps,
 		ConfigFilePath: *configPath,
 		TrustedSubnet:  *trustedSubnet,
+		GRPCPort:       *grpcPort,
 	}
 }
 
@@ -155,6 +163,8 @@ func GetMainConfig() Config {
 		enableHttps = *env.EnableHttps
 	}
 
+	defaultPort := GRPC_PORT
+
 	return Config{
 		ListenHost:    coalesce(flagCfg.ListenHost, env.ListenHost, &(configFileData.ListenHost)),
 		URLHost:       coalesce(flagCfg.URLHost, env.URLHost, &(configFileData.URLHost)),
@@ -167,6 +177,7 @@ func GetMainConfig() Config {
 		CertFile:      coalesce(env.CertFile, CERT_FILE, nil),
 		KeyFile:       coalesce(env.KeyFile, KEY_FILE, nil),
 		TrustedSubnet: coalesce(flagCfg.TrustedSubnet, env.TrustedSubnet, &(configFileData.TrustedSubnet)),
+		GRPCPort:      coalesce(flagCfg.GRPCPort, env.GRPCPort, &defaultPort),
 	}
 }
 
