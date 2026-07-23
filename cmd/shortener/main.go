@@ -70,7 +70,7 @@ func main() {
 	e.GET(`/ping`, handler.GetPingDBHandler(dbService, l))
 	e.POST(`/api/shorten/batch`, handler.GetSaveURLBatchHandler(cfg, l))
 	e.GET(`/api/user/urls`, handler.GetURLByUserHandler(cfg, l))
-	e.GET(`/api/imternal/stats`, handler.GetStatsHandler(cfg, l))
+	e.GET(`/api/internal/stats`, handler.GetStatsHandler(cfg, l))
 
 	deleteCh := make(chan DTO.DeleteBatch)
 	listener := deleteurl.GetDeleteUrlListener(cfg, deleteCh, l)
@@ -108,7 +108,7 @@ func startGRPC(cfg config.StorageConfig, auditCh chan DTO.BaseAuditItem, l *zap.
 		return nil
 	}
 
-	grpcSvc := grpc.NewServer()
+	grpcSvc := grpc.NewServer(grpc.UnaryInterceptor(grpcserver.AuthInterceptor(&cfg)))
 	shortenerpb.RegisterShortenerServiceServer(grpcSvc, grpcserver.NewServer(cfg, auditCh))
 	go func() {
 		if err := grpcSvc.Serve(grpcListener); err != nil {

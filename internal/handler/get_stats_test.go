@@ -37,7 +37,7 @@ func TestStats_NoTrustedSubnet_ReturnsForbidden(t *testing.T) {
 	cfg := makeStatsCfg(nil, "")
 	h := GetStatsHandler(cfg, l)
 
-	req := httptest.NewRequest(http.MethodGet, "http://localhost/api/imternal/stats", nil)
+	req := httptest.NewRequest(http.MethodGet, "http://localhost/api/internal/stats", nil)
 	req.Header.Set("X-Real-IP", "10.0.0.5")
 	w := httptest.NewRecorder()
 	c := echo.New().NewContext(req, w)
@@ -51,7 +51,7 @@ func TestStats_TrustedIP_ReturnsOK(t *testing.T) {
 	cfg := makeStatsCfg(nil, "10.0.0.0/8")
 	h := GetStatsHandler(cfg, l)
 
-	req := httptest.NewRequest(http.MethodGet, "http://localhost/api/imternal/stats", nil)
+	req := httptest.NewRequest(http.MethodGet, "http://localhost/api/internal/stats", nil)
 	req.Header.Set("X-Real-IP", "10.0.0.5")
 	w := httptest.NewRecorder()
 	c := echo.New().NewContext(req, w)
@@ -65,7 +65,7 @@ func TestStats_UntrustedIP_ReturnsForbidden(t *testing.T) {
 	cfg := makeStatsCfg(nil, "10.0.0.0/8")
 	h := GetStatsHandler(cfg, l)
 
-	req := httptest.NewRequest(http.MethodGet, "http://localhost/api/imternal/stats", nil)
+	req := httptest.NewRequest(http.MethodGet, "http://localhost/api/internal/stats", nil)
 	req.Header.Set("X-Real-IP", "192.168.1.1")
 	w := httptest.NewRecorder()
 	c := echo.New().NewContext(req, w)
@@ -79,7 +79,7 @@ func TestStats_NoXRealIP_ReturnsForbidden(t *testing.T) {
 	cfg := makeStatsCfg(nil, "10.0.0.0/8")
 	h := GetStatsHandler(cfg, l)
 
-	req := httptest.NewRequest(http.MethodGet, "http://localhost/api/imternal/stats", nil)
+	req := httptest.NewRequest(http.MethodGet, "http://localhost/api/internal/stats", nil)
 	w := httptest.NewRecorder()
 	c := echo.New().NewContext(req, w)
 	h(c)
@@ -92,7 +92,7 @@ func TestStats_InvalidCIDR_ReturnsForbidden(t *testing.T) {
 	cfg := makeStatsCfg(nil, "not-a-cidr")
 	h := GetStatsHandler(cfg, l)
 
-	req := httptest.NewRequest(http.MethodGet, "http://localhost/api/imternal/stats", nil)
+	req := httptest.NewRequest(http.MethodGet, "http://localhost/api/internal/stats", nil)
 	req.Header.Set("X-Real-IP", "10.0.0.5")
 	w := httptest.NewRecorder()
 	c := echo.New().NewContext(req, w)
@@ -112,7 +112,7 @@ func TestStats_DBError_Returns500(t *testing.T) {
 	cfg := makeStatsCfg(db, "0.0.0.0/0")
 	h := GetStatsHandler(cfg, l)
 
-	req := httptest.NewRequest(http.MethodGet, "http://localhost/api/imternal/stats", nil)
+	req := httptest.NewRequest(http.MethodGet, "http://localhost/api/internal/stats", nil)
 	req.Header.Set("X-Real-IP", "1.2.3.4")
 	w := httptest.NewRecorder()
 	c := echo.New().NewContext(req, w)

@@ -13,7 +13,7 @@ var (
 	ErrorCountUsers = errors.New("failed to count users")
 )
 
-// Response is the JSON body of GET /api/imternal/stats.
+// Response is the JSON body of GET /api/internal/stats.
 type Response struct {
 	URLsInDB int `json:"urls"`
 	Users    int `json:"users"`
