@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package shortener;
+
+option go_package = "github.com/Vaha95/golang_pet/api/shortenerpb";
+
+service ShortenerService {
+  rpc Shorten (ShortenRequest) returns (ShortenResponse);
+  rpc Resolve (ResolveRequest) returns (ResolveResponse);
+  rpc GetUserURLs (GetUserURLsRequest) returns (GetUserURLsResponse);
+}
+
+message ShortenRequest {
+  string url = 1;
+}
+
+message ShortenResponse {
+  string short_url = 1;
+}
+
+message ResolveRequest {
+  string id = 1;
+}
+
+message ResolveResponse {
+  string url = 1;
+  bool deleted = 2;
+}
+
+message GetUserURLsRequest {}
+
+message GetUserURLsResponse {
+  repeated UserURL urls = 1;
+}
+
+message UserURL {
+  string short = 1;
+  string url = 2;
+  bool deleted = 3;
+}
